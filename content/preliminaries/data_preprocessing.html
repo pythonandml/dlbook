@@ -1,0 +1,1311 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>1.1. Data Preprocessing &#8212; Oddly Satisfying Deep Learning</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../../_static/logo.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="1.2. Performance Metrics for ML and DL models" href="performance_metrics.html" />
+    <link rel="prev" title="Introduction" href="../intro.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">Oddly Satisfying Deep Learning</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  1. Preliminaries
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   1.1. Data Preprocessing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="performance_metrics.html">
+   1.2. Performance Metrics for ML and DL models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  2. Multilayer Perceptrons
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/activation.html">
+   2.1. Activation Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/perceptron.html">
+   2.2. Perceptron
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_1.html">
+   2.3. Terminologies Part-1
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/cost_functions.html">
+   2.4. Cost functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/forward_propagation.html">
+   2.5. Forward propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/backpropagation.html">
+   2.6. Back Propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_2.html">
+   2.7. Terminologies Part-2
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/gradient_descent.html">
+   2.8. Gradient Descent
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/regularization.html">
+   2.9. Regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/dropout.html">
+   2.10. Dropout regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/batch_normalization.html">
+   2.11. Batch Normalization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/numerical_example_forward_backward_propagation.html">
+   2.12. Numerical example Forward and Back pass
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/shortcut_to_calculate_forward_back_propagation.html">
+   2.13. Shortcut to calculate forward pass and backpropagation across layers
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/neural_networks_mlp_scratch_best.html">
+   2.14. MLP model from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_pytorch.html">
+   2.15. 4 step process to build MLP model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_keras.html">
+   2.16. MLP model using Tensorflow - Keras
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  3. Convolutional Neural Networks
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_over_mlp.html">
+   3.1. Convolutional Neural Networks over MLP
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_architecture.html">
+   3.2. Basic Architecture of CNN
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/convolutional_layers.html">
+     3.2.1. Convolutional layers
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/forward_propagation_convolution.html">
+     3.2.2 Forward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/backpropagation_convolution.html">
+     3.2.3 Backward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/pooling_layers.html">
+     3.2.4. Pooling layers
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_from_scratch.html">
+   3.3. Convolutional Neural Networks from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_pytorch.html">
+   3.4. 4 step process to build a CNN model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_keras.html">
+   3.5. CNN model using Tensorflow - Keras
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_state_of_the_art.html">
+   3.6. State of the art CNN models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  4. Word Embeddings
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../word_embeddings/traditional_word_embeddings.html">
+   4.1. Traditional Word Embeddings
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/static_word_embeddings.html">
+   4.2. Static Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/word2vec.html">
+     4.2.1. Word2Vec
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/glove.html">
+     4.2.2 GloVe
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/fasttext.html">
+     4.2.3. FastText
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/contextual_word_embeddings.html">
+   4.3. Contextual Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/elmo.html">
+     4.3.1. Embeddings from Language Models (ELMo)
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<div class="menu-dropdown menu-dropdown-launch-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Launch interactive content">
+      <i class="fas fa-rocket"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://mybinder.org/v2/gh/pythonandml/dlbook/master?urlpath=tree/content/preliminaries/data_preprocessing.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Binder"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_binder.svg">
+  </span>
+<span class="headerbtn__text-container">Binder</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://colab.research.google.com/github/pythonandml/dlbook/blob/master/content/preliminaries/data_preprocessing.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Colab"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_colab.png">
+  </span>
+<span class="headerbtn__text-container">Colab</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/pythonandml/dlbook"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/pythonandml/dlbook/issues/new?title=Issue%20on%20page%20%2Fcontent/preliminaries/data_preprocessing.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="../../_sources/content/preliminaries/data_preprocessing.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#a-scaling">
+   A. Scaling
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#standardisation">
+     1. Standardisation
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#validate-using-sklearn">
+     Validate using Sklearn
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#min-max-scaling">
+     2. Min-Max Scaling
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id1">
+     Validate using Sklearn
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#b-encoding">
+   B. Encoding
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#label-encoding">
+     1. Label Encoding
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#one-hot-encoding">
+     2. One-Hot encoding
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>1.1. Data Preprocessing</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#a-scaling">
+   A. Scaling
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#standardisation">
+     1. Standardisation
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#validate-using-sklearn">
+     Validate using Sklearn
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#min-max-scaling">
+     2. Min-Max Scaling
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id1">
+     Validate using Sklearn
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#b-encoding">
+   B. Encoding
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#label-encoding">
+     1. Label Encoding
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#one-hot-encoding">
+     2. One-Hot encoding
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="data-preprocessing">
+<h1>1.1. Data Preprocessing<a class="headerlink" href="#data-preprocessing" title="Permalink to this headline">#</a></h1>
+<section id="a-scaling">
+<h2>A. Scaling<a class="headerlink" href="#a-scaling" title="Permalink to this headline">#</a></h2>
+<p><strong>Why Scaling of features is important?</strong></p>
+<p>Our dataset can contain features that vary highly in magnitude and since ML and DL algorithms use Eucledian distance between two data points in their computations, this is a problem. Input variables may have different units (e.g. feet, kilometers, and hours) that, in turn, may mean the variables have different scales. The results would vary greatly between different units, 5kg and 5000gms.</p>
+<p>The features with high magnitudes will weigh in a lot more in the distance calculations than features with low magnitudes. To supress this effect, we need to bring all features to the same level of magnitudes and this is where scaling comes into the picture.</p>
+<p><strong>How to Scale Features?</strong></p>
+<p>There are two most common methods to perform Feature Scaling.</p>
+<section id="standardisation">
+<h3>1. Standardisation<a class="headerlink" href="#standardisation" title="Permalink to this headline">#</a></h3>
+<p>Standardization typically means rescaling data to have a mean of 0 and a standard deviation of 1 (unit variance).</p>
+<p>Standardization assumes that your observations fit a Gaussian distribution (bell curve) with a well behaved mean and standard deviation. You can still standardize your data if this expectation is not met, but you may not get reliable results.</p>
+<p>Mathematically it can be expressed as:</p>
+<div class="math notranslate nohighlight">
+\[
+Z = \frac{X-\bar{X}}{\sigma}
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(\bar{X}\)</span> and <span class="math notranslate nohighlight">\(\sigma\)</span> are the mean and standard deviation of <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Z\)</span> is the standardized data.</p>
+<p>The <em>standardize(X)</em> function below implements the standardization of <span class="math notranslate nohighlight">\(X\)</span>.</p>
+<blockquote>
+<div><p><strong>Note:</strong> If <span class="math notranslate nohighlight">\(X\)</span> has many dimensions (or features) and we want to standardize each column individually, then we specify the axis:</p>
+</div></blockquote>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">standardize</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Z</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Generate a random normal distribution (dataset <span class="math notranslate nohighlight">\(X\)</span>) having 10000 samples with mean (<span class="math notranslate nohighlight">\(\bar{X}\)</span>) at 1 and standard deviation <span class="math notranslate nohighlight">\((\sigma)\)</span> of 2 and visualize the same</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># plot</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Distribution of X&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/data_preprocessing_3_0.png" src="../../_images/data_preprocessing_3_0.png" />
+</div>
+</div>
+<p>Now, let us standardize <span class="math notranslate nohighlight">\(X\)</span> and visualize it (to demonstrate our function). The complete example is listed below.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="k">def</span> <span class="nf">standardize</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Z</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">Z</span> <span class="o">=</span> <span class="n">standardize</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># plot</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;X (without standardization)&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">Z</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;X (with standardization)&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Distribution of X (with and without standardization)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/data_preprocessing_5_0.png" src="../../_images/data_preprocessing_5_0.png" />
+</div>
+</div>
+</section>
+<section id="validate-using-sklearn">
+<h3>Validate using Sklearn<a class="headerlink" href="#validate-using-sklearn" title="Permalink to this headline">#</a></h3>
+<p>Let us validate our function using sklearn’s (which is most useful and robust library for machine learning in Python) StandardScaler module. Complete example is listed below</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="k">def</span> <span class="nf">standardize</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Z</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">standardize</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># using sklearn</span>
+<span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+<span class="n">scaler</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">Zs</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># plot</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">Z</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;standardization - our function&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">Zs</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;standardization - sklearn&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Standardization (our function woth sklearn)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/data_preprocessing_7_0.png" src="../../_images/data_preprocessing_7_0.png" />
+</div>
+</div>
+<p>We have successfully validated our function!</p>
+</section>
+<section id="min-max-scaling">
+<h3>2. Min-Max Scaling<a class="headerlink" href="#min-max-scaling" title="Permalink to this headline">#</a></h3>
+<p>In min-max normalization, for every feature (column), its minimum value gets transformed into 0 and its maximum value gets transformed into 1. All values in-between get scaled to be within 0-1 range based on the original value relative to minimum and maximum values of the feature.</p>
+<p>Mathematically,</p>
+<div class="math notranslate nohighlight">
+\[
+Z = \frac{X-X_{min}}{X_{max}-X_{min}}
+\]</div>
+<p>Note: If <span class="math notranslate nohighlight">\(X\)</span> has many dimensions (or features or columns) and we want to min-max normalize each column individually, then we specify the axis.</p>
+<p>The <em>minmax(X)</em> function below implements the min-max normalization of <span class="math notranslate nohighlight">\(X\)</span>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">minmax</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Z</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>For the given 1D dataset <span class="math notranslate nohighlight">\(X\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>let us normalize (min-max) <span class="math notranslate nohighlight">\(X\)</span> (to demonstrate our function). The complete example is listed below.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">minmax</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Z</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">minmax</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original dataset (X) =&quot;</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">X (after min-max normalization) =&quot;</span><span class="p">,</span> <span class="n">Z</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original dataset (X) = [1 2 3 4 5]
+
+X (after min-max normalization) = [0.   0.25 0.5  0.75 1.  ]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now consider a 2D dataset <span class="math notranslate nohighlight">\(X\)</span> (having 4 samples):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+     <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+     <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+     <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>let us min-max normalize <span class="math notranslate nohighlight">\(X\)</span>. The complete example is listed below.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">minmax</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Z</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">minmax</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original dataset (X) =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">X (after min-max normalization) =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">Z</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original dataset (X) =
+
+ [[1 7]
+ [4 3]
+ [5 2]
+ [3 6]]
+
+X (after min-max normalization) =
+
+ [[0.   1.  ]
+ [0.75 0.2 ]
+ [1.   0.  ]
+ [0.5  0.8 ]]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="id1">
+<h3>Validate using Sklearn<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h3>
+<p>Let us validate our function using sklearn’s MinMaxScaler module. Complete example is listed below</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span>
+
+<span class="k">def</span> <span class="nf">minmax</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Z</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">minmax</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="n">scaler</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">()</span>
+<span class="n">scaler</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">Zs</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original dataset (X) =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Min-Max normalization - our function =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">Z</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Min-Max normalization - sklearn =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">Zs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Original dataset (X) =
+
+ [[1 7]
+ [4 3]
+ [5 2]
+ [3 6]]
+
+Min-Max normalization - our function =
+
+ [[0.   1.  ]
+ [0.75 0.2 ]
+ [1.   0.  ]
+ [0.5  0.8 ]]
+
+Min-Max normalization - sklearn =
+
+ [[0.   1.  ]
+ [0.75 0.2 ]
+ [1.   0.  ]
+ [0.5  0.8 ]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>We have successfully validated our function!</p>
+</section>
+</section>
+<section id="b-encoding">
+<h2>B. Encoding<a class="headerlink" href="#b-encoding" title="Permalink to this headline">#</a></h2>
+<p>Most algorithms cannot work with categorical data and needs to be converted into numerical data. Sometimes in datasets, we encounter columns that contain categorical features (string values) for example parameter <strong>Gender</strong> will have categorical parameters like <em>Male</em>, <em>Female</em>.</p>
+<p>Suppose we have the following fictional dataset <span class="math notranslate nohighlight">\(X\)</span> with 7 samples (rows) and 3 features (or dimensions or columns; 2 categorical columns <em>Fruits</em> and <em>Vegetables</em> and 1 numerical column <em>Value</em>)</p>
+<table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Fruits</p></th>
+<th class="head"><p>Vegetables</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Apple</p></td>
+<td><p>Tomato</p></td>
+<td><p>8</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mango</p></td>
+<td><p>Tomato</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>Apple</p></td>
+<td><p>Carrot</p></td>
+<td><p>7</p></td>
+</tr>
+<tr class="row-odd"><td><p>Orange</p></td>
+<td><p>Potato</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-even"><td><p>Papaya</p></td>
+<td><p>Carrot</p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-odd"><td><p>Banana</p></td>
+<td><p>Tomato</p></td>
+<td><p>7</p></td>
+</tr>
+<tr class="row-even"><td><p>Orange</p></td>
+<td><p>Potato</p></td>
+<td><p>7</p></td>
+</tr>
+</tbody>
+</table>
+<section id="label-encoding">
+<h3>1. Label Encoding<a class="headerlink" href="#label-encoding" title="Permalink to this headline">#</a></h3>
+<p>One approach to solve this problem can be label encoding where we will assign a numerical value to these labels for example Male and Female mapped to 0 and 1.</p>
+<p>The <em>label_encoding(Y)</em> function implemented below performs label encoding of the categorical data <span class="math notranslate nohighlight">\(Y\)</span> and returns the label encoded data of <span class="math notranslate nohighlight">\(Y\)</span> along with a list of the dictionaries containing the unique values of the columns and their mapping to the integer.</p>
+<blockquote>
+<div><p><strong>Note:</strong> <span class="math notranslate nohighlight">\(Y\)</span> must have only categorical columns (like <em>Fruits</em> and <em>Vegetables</em> only and <strong>NOT</strong> the <em>Value</em> column from the above dataset <span class="math notranslate nohighlight">\(X\)</span>)</p>
+</div></blockquote>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">label_encoding</span><span class="p">(</span><span class="n">Y</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    Y: (m,d) shape matrix with categorical data</span>
+<span class="sd">    Return</span>
+<span class="sd">    result: label encoded data of 𝑌</span>
+<span class="sd">    idx_list: list of the dictionaries containing the unique values </span>
+<span class="sd">              of the columns and their mapping to the integer.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">idx_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="p">{</span><span class="n">val</span><span class="p">:</span> <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Y</span><span class="p">[:,</span> <span class="n">col</span><span class="p">]))}</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">indexes</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">Y</span><span class="p">[:,</span> <span class="n">col</span><span class="p">]])</span>
+        <span class="n">idx_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indexes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">idx_list</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Consider the given dataset <span class="math notranslate nohighlight">\(X\)</span> and we want to perform label encoding of <span class="math notranslate nohighlight">\(X\)</span> using the function developed above. Complete example is listed below.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">label_encoding</span><span class="p">(</span><span class="n">Y</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    Y: (m,d) shape matrix with categorical data</span>
+<span class="sd">    Return</span>
+<span class="sd">    result: label encoded data of 𝑌</span>
+<span class="sd">    idx_list: list of the dictionaries containing the unique values </span>
+<span class="sd">              of the columns and their mapping to the integer.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">idx_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="p">{</span><span class="n">val</span><span class="p">:</span> <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Y</span><span class="p">[:,</span> <span class="n">col</span><span class="p">]))}</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">indexes</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">Y</span><span class="p">[:,</span> <span class="n">col</span><span class="p">]])</span>
+        <span class="n">idx_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indexes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">idx_list</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="s1">&#39;Apple&#39;</span><span class="p">,</span> <span class="s1">&#39;Tomato&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+              <span class="p">[</span><span class="s1">&#39;Mango&#39;</span><span class="p">,</span> <span class="s1">&#39;Tomato&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+              <span class="p">[</span><span class="s1">&#39;Apple&#39;</span><span class="p">,</span> <span class="s1">&#39;Carrot&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+              <span class="p">[</span><span class="s1">&#39;Orange&#39;</span><span class="p">,</span> <span class="s1">&#39;Potato&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+              <span class="p">[</span><span class="s1">&#39;Papaya&#39;</span><span class="p">,</span> <span class="s1">&#39;Carrot&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+              <span class="p">[</span><span class="s1">&#39;Banana&#39;</span><span class="p">,</span> <span class="s1">&#39;Tomato&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+              <span class="p">[</span><span class="s1">&#39;Orange&#39;</span><span class="p">,</span> <span class="s1">&#39;Potato&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">]])</span>
+
+<span class="n">Y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">Y_label_enc</span><span class="p">,</span> <span class="n">idx_list</span> <span class="o">=</span> <span class="n">label_encoding</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Categorical dataset (Y) =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Mapping List of Dictionaries =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">idx_list</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Label Encoding of Y =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">Y_label_enc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Categorical dataset (Y) =
+
+ [[&#39;Apple&#39; &#39;Tomato&#39;]
+ [&#39;Mango&#39; &#39;Tomato&#39;]
+ [&#39;Apple&#39; &#39;Carrot&#39;]
+ [&#39;Orange&#39; &#39;Potato&#39;]
+ [&#39;Papaya&#39; &#39;Carrot&#39;]
+ [&#39;Banana&#39; &#39;Tomato&#39;]
+ [&#39;Orange&#39; &#39;Potato&#39;]]
+
+Mapping List of Dictionaries =
+
+ [{&#39;Apple&#39;: 0, &#39;Banana&#39;: 1, &#39;Mango&#39;: 2, &#39;Orange&#39;: 3, &#39;Papaya&#39;: 4}, {&#39;Carrot&#39;: 0, &#39;Potato&#39;: 1, &#39;Tomato&#39;: 2}]
+
+Label Encoding of Y =
+
+ [[0 2]
+ [2 2]
+ [0 0]
+ [3 1]
+ [4 0]
+ [1 2]
+ [3 1]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>We see here that in the Fruits column, “Apple” is mapped to 0, Banana to 1 and so on. Similarly, in the Vegetables column, “Carrot” is mapped to 0, Potato to 1 and Tomato to 2.</p>
+<p>After getting this mapping list, we have our final label encoded matrix</p>
+</section>
+<section id="one-hot-encoding">
+<h3>2. One-Hot encoding<a class="headerlink" href="#one-hot-encoding" title="Permalink to this headline">#</a></h3>
+<p>In this technique, the categorical parameters will prepare separate columns for all the labels. So, wherever there is Male, the value will be 1 in Male column and 0 in Female column, and vice-versa.</p>
+<p>Let us understand this with a simple example where data <span class="math notranslate nohighlight">\(X\)</span> is:</p>
+<table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Fruits</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Apple</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mango</p></td>
+</tr>
+<tr class="row-even"><td><p>Apple</p></td>
+</tr>
+<tr class="row-odd"><td><p>Apple</p></td>
+</tr>
+<tr class="row-even"><td><p>Orange</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mango</p></td>
+</tr>
+</tbody>
+</table>
+<p>Notice that <span class="math notranslate nohighlight">\(X\)</span> has only 3 unique values “Apple”, “Mango” and “Orange”. So, the One-Hot encoded matrix of <span class="math notranslate nohighlight">\(X\)</span> will look like:</p>
+<table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Fruit</p></th>
+<th class="head"><p>Apple</p></th>
+<th class="head"><p>Mango</p></th>
+<th class="head"><p>Orange</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Apple</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mango</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Apple</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Apple</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Orange</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mango</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<p>Just observe that wherever we have “Apple” in the <em>Fruits</em> column, the column <em>Apple</em> contains value 1 and 0 otherwise. Similarly, wherever we have “Mango” or “Orange” in the <em>Fruits</em> column, the columns <em>Mango</em> and <em>Orange</em> contains value 1 and 0 otherwise respectively.</p>
+<blockquote>
+<div><p><strong>Note:</strong> The order of the columns <em>Apple</em>, <em>Mango</em> or <em>Orange</em> can change</p>
+</div></blockquote>
+<p>The <em>onehot(X)</em> function implemented below performs one hot encoding of the categorical data <span class="math notranslate nohighlight">\(X\)</span> and returns the one hot encoded data of <span class="math notranslate nohighlight">\(X\)</span> along with a dictionary containing the unique values of <span class="math notranslate nohighlight">\(X\)</span> and their mapping to the integer column (as orders can change).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">onehot</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    X: 1D array of labels of length &quot;m&quot;</span>
+<span class="sd">    Return</span>
+<span class="sd">    X_onehot: (m,d) one hot encoded matrix (one-hot of X) </span>
+<span class="sd">              (where d is the number of unique values in X)</span>
+<span class="sd">    indexes: dictionary containing the unique values of X and their mapping to the integer column</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">indexes</span> <span class="o">=</span> <span class="p">{</span><span class="n">val</span><span class="p">:</span> <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">X</span><span class="p">))}</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">indexes</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">X</span><span class="p">])</span>
+    <span class="n">X_onehot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">)))</span>
+    <span class="n">X_onehot</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">X_onehot</span><span class="p">,</span> <span class="n">indexes</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Consider the dataset from above example <span class="math notranslate nohighlight">\(X\)</span> and we want to perform one hot encoding of <span class="math notranslate nohighlight">\(X\)</span> using the function developed above. Complete example is listed below.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">onehot</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters:</span>
+<span class="sd">    X: 1D array of labels of length &quot;m&quot;</span>
+<span class="sd">    Return</span>
+<span class="sd">    X_onehot: (m,d) one hot encoded matrix (one-hot of X) </span>
+<span class="sd">              (where d is the number of unique values in X)</span>
+<span class="sd">    indexes: dictionary containing the unique values of X and their mapping to the integer column</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">indexes</span> <span class="o">=</span> <span class="p">{</span><span class="n">val</span><span class="p">:</span> <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">X</span><span class="p">))}</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">indexes</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">X</span><span class="p">])</span>
+    <span class="n">X_onehot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">)))</span>
+    <span class="n">X_onehot</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">y</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">X_onehot</span><span class="p">,</span> <span class="n">indexes</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;Apple&#39;</span><span class="p">,</span> <span class="s1">&#39;Mango&#39;</span><span class="p">,</span> <span class="s1">&#39;Apple&#39;</span><span class="p">,</span> <span class="s1">&#39;Apple&#39;</span><span class="p">,</span> <span class="s1">&#39;Orange&#39;</span><span class="p">,</span> <span class="s1">&#39;Mango&#39;</span><span class="p">])</span>
+
+<span class="n">X_onehot</span><span class="p">,</span> <span class="n">indexes</span> <span class="o">=</span> <span class="n">onehot</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Given dataset (X) =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Mapping Dictionary =&quot;</span><span class="p">,</span> <span class="n">indexes</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">One Hot Encoding of X =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">X_onehot</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Given dataset (X) =
+
+ [[&#39;Apple&#39;]
+ [&#39;Mango&#39;]
+ [&#39;Apple&#39;]
+ [&#39;Apple&#39;]
+ [&#39;Orange&#39;]
+ [&#39;Mango&#39;]]
+
+Mapping Dictionary = {&#39;Apple&#39;: 0, &#39;Mango&#39;: 1, &#39;Orange&#39;: 2}
+
+One Hot Encoding of X =
+
+ [[1. 0. 0.]
+ [0. 1. 0.]
+ [1. 0. 0.]
+ [1. 0. 0.]
+ [0. 0. 1.]
+ [0. 1. 0.]]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./content/preliminaries"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="../intro.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Introduction</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="performance_metrics.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">1.2. Performance Metrics for ML and DL models</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Ujjwal Khandelwal<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

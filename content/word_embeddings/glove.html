@@ -1,0 +1,1105 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>4.2.2 GloVe &#8212; Oddly Satisfying Deep Learning</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../../_static/logo.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="4.2.3. FastText" href="fasttext.html" />
+    <link rel="prev" title="4.2.1. Word2Vec" href="word2vec.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">Oddly Satisfying Deep Learning</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  1. Preliminaries
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/data_preprocessing.html">
+   1.1. Data Preprocessing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/performance_metrics.html">
+   1.2. Performance Metrics for ML and DL models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  2. Multilayer Perceptrons
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/activation.html">
+   2.1. Activation Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/perceptron.html">
+   2.2. Perceptron
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_1.html">
+   2.3. Terminologies Part-1
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/cost_functions.html">
+   2.4. Cost functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/forward_propagation.html">
+   2.5. Forward propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/backpropagation.html">
+   2.6. Back Propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_2.html">
+   2.7. Terminologies Part-2
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/gradient_descent.html">
+   2.8. Gradient Descent
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/regularization.html">
+   2.9. Regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/dropout.html">
+   2.10. Dropout regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/batch_normalization.html">
+   2.11. Batch Normalization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/numerical_example_forward_backward_propagation.html">
+   2.12. Numerical example Forward and Back pass
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/shortcut_to_calculate_forward_back_propagation.html">
+   2.13. Shortcut to calculate forward pass and backpropagation across layers
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/neural_networks_mlp_scratch_best.html">
+   2.14. MLP model from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_pytorch.html">
+   2.15. 4 step process to build MLP model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_keras.html">
+   2.16. MLP model using Tensorflow - Keras
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  3. Convolutional Neural Networks
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_over_mlp.html">
+   3.1. Convolutional Neural Networks over MLP
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_architecture.html">
+   3.2. Basic Architecture of CNN
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/convolutional_layers.html">
+     3.2.1. Convolutional layers
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/forward_propagation_convolution.html">
+     3.2.2 Forward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/backpropagation_convolution.html">
+     3.2.3 Backward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/pooling_layers.html">
+     3.2.4. Pooling layers
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_from_scratch.html">
+   3.3. Convolutional Neural Networks from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_pytorch.html">
+   3.4. 4 step process to build a CNN model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_keras.html">
+   3.5. CNN model using Tensorflow - Keras
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_state_of_the_art.html">
+   3.6. State of the art CNN models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  4. Word Embeddings
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="traditional_word_embeddings.html">
+   4.1. Traditional Word Embeddings
+  </a>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="static_word_embeddings.html">
+   4.2. Static Word Embeddings
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2">
+    <a class="reference internal" href="word2vec.html">
+     4.2.1. Word2Vec
+    </a>
+   </li>
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     4.2.2 GloVe
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="fasttext.html">
+     4.2.3. FastText
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="contextual_word_embeddings.html">
+   4.3. Contextual Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="elmo.html">
+     4.3.1. Embeddings from Language Models (ELMo)
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<div class="menu-dropdown menu-dropdown-launch-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Launch interactive content">
+      <i class="fas fa-rocket"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://mybinder.org/v2/gh/pythonandml/dlbook/master?urlpath=tree/content/word_embeddings/glove.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Binder"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_binder.svg">
+  </span>
+<span class="headerbtn__text-container">Binder</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://colab.research.google.com/github/pythonandml/dlbook/blob/master/content/word_embeddings/glove.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Colab"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_colab.png">
+  </span>
+<span class="headerbtn__text-container">Colab</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/pythonandml/dlbook"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/pythonandml/dlbook/issues/new?title=Issue%20on%20page%20%2Fcontent/word_embeddings/glove.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="../../_sources/content/word_embeddings/glove.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#python-code-for-glove">
+   Python Code for GloVe
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#import-essential-libraries">
+     Import essential libraries
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#download-the-pretrained-glove-data-files">
+     Download the pretrained GloVe data files
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#unzipping-the-zipped-folder">
+     Unzipping the zipped folder
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#initialising-a-tokenizer-and-fitting-it-on-the-training-dataset">
+     Initialising a tokenizer and fitting it on the training dataset
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#opening-glove-file">
+     Opening GloVe file
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#creating-a-dictionary-to-store-the-embeddings">
+     Creating a dictionary to store the embeddings
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#glove-embeddings-on-our-custom-training-dataset">
+     Glove embeddings on our custom training dataset
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#displaying-embedding-matrix">
+     Displaying embedding matrix
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#glove-embeddings-using-gensim">
+     GloVe embeddings using gensim
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>4.2.2 GloVe</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#python-code-for-glove">
+   Python Code for GloVe
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#import-essential-libraries">
+     Import essential libraries
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#download-the-pretrained-glove-data-files">
+     Download the pretrained GloVe data files
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#unzipping-the-zipped-folder">
+     Unzipping the zipped folder
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#initialising-a-tokenizer-and-fitting-it-on-the-training-dataset">
+     Initialising a tokenizer and fitting it on the training dataset
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#opening-glove-file">
+     Opening GloVe file
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#creating-a-dictionary-to-store-the-embeddings">
+     Creating a dictionary to store the embeddings
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#glove-embeddings-on-our-custom-training-dataset">
+     Glove embeddings on our custom training dataset
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#displaying-embedding-matrix">
+     Displaying embedding matrix
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#glove-embeddings-using-gensim">
+     GloVe embeddings using gensim
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="glove">
+<h1>4.2.2 GloVe<a class="headerlink" href="#glove" title="Permalink to this headline">#</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">GloVe</span></code> stands for <strong>Global Vectors for Word Representation</strong>. This algorithm is an improvement over the <a class="reference external" href="https://pythonandml.github.io/dlbook/content/word_embeddings/word2vec.html">Word2Vec</a> (link to previous chapter) approach as it considers global statistics instead of local statistics.</p>
+<p>Here, global statistics mean, the words considered from across the whole corpus. In this method, we take the corpus and iterate through it and get the <a class="reference external" href="https://pythonandml.github.io/dlbook/content/word_embeddings/traditional_word_embeddings.html#co-occurrence-matrix">co-occurrence</a> (link to previous chapter) of each word with other words in the corpus.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>GloVe method is built on an important idea:</p>
+<p>You can derive semantic relationships between words from the co-occurrence matrix.</p>
+</div>
+<p>For example let our corpus be as follows:</p>
+<blockquote>
+<div><p>This is the first document. This document is the second document. This is the third one. Is this the first document?</p>
+</div></blockquote>
+<p>Now assume that we have removed all the punctuations from the documents and also we have converted all the words to lower case. This is what pre-processed documents would look like:</p>
+<div class="sd-card sd-sphinx-override sd-mb-3 sd-shadow-sm docutils">
+<div class="sd-card-body docutils">
+<p class="sd-card-text">Document-1 (Sentence-1): this is the first document</p>
+<p class="sd-card-text">Document-2 (Sentence-2): this document is the second document</p>
+<p class="sd-card-text">Document-3 (Sentence-3): this is the third one</p>
+<p class="sd-card-text">Document-4 (Sentence-4): is this the first document</p>
+</div>
+</div>
+<p>The below matrix represents a co-occurrence matrix whose values denote the count of each pair of words occurring together in the given example corpus.</p>
+<p><img alt="" src="../../_images/co_occurence.png" /></p>
+<p>The entry ‘4’ in the following table, means that we had 4 sentences in our text where <code class="docutils literal notranslate"><span class="pre">is</span></code> was surrounded by <code class="docutils literal notranslate"><span class="pre">the</span></code>.</p>
+<table class="colwidths-auto table">
+<thead>
+<tr class="row-odd"><th class="text-align:left head"><p></p></th>
+<th class="text-align:right head"><p>document</p></th>
+<th class="text-align:right head"><p>first</p></th>
+<th class="text-align:right head"><p>is</p></th>
+<th class="text-align:right head"><p>one</p></th>
+<th class="text-align:right head"><p>second</p></th>
+<th class="text-align:right head"><p>the</p></th>
+<th class="text-align:right head"><p>third</p></th>
+<th class="text-align:right head"><p>this</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-align:left"><p>document</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>2</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>4</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:left"><p>first</p></td>
+<td class="text-align:right"><p>2</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>2</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>1</p></td>
+</tr>
+<tr class="row-even"><td class="text-align:left"><p>is</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>4</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>4</p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:left"><p>one</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>0</p></td>
+</tr>
+<tr class="row-even"><td class="text-align:left"><p>second</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:left"><p>the</p></td>
+<td class="text-align:right"><p>4</p></td>
+<td class="text-align:right"><p>2</p></td>
+<td class="text-align:right"><p>4</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>3</p></td>
+</tr>
+<tr class="row-even"><td class="text-align:left"><p>third</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:left"><p>this</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>1</p></td>
+<td class="text-align:right"><p>4</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>3</p></td>
+<td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<p>Note that the co-occurrence matrix is always symmetric - the entry with the row word ‘the’ and the column word ‘is’ will be 4 as well (as these words co-occur in the very same sentences).</p>
+<p>Finally, after computing the probability of occurrence for the word <code class="docutils literal notranslate"><span class="pre">&quot;first&quot;</span></code> given <code class="docutils literal notranslate"><span class="pre">&quot;document&quot;</span></code>, <span class="math notranslate nohighlight">\(P(\text{first} | \text{document})\)</span> and <code class="docutils literal notranslate"><span class="pre">&quot;first&quot;</span></code> given <code class="docutils literal notranslate"><span class="pre">&quot;third&quot;</span></code>, <span class="math notranslate nohighlight">\(P(\text{first} | \text{third})\)</span>, it turns out that the most relevant word to <code class="docutils literal notranslate"><span class="pre">&quot;first&quot;</span></code> is <code class="docutils literal notranslate"><span class="pre">&quot;document&quot;</span></code> as compared to <code class="docutils literal notranslate"><span class="pre">&quot;third&quot;</span></code>.</p>
+<section id="python-code-for-glove">
+<h2>Python Code for GloVe<a class="headerlink" href="#python-code-for-glove" title="Permalink to this headline">#</a></h2>
+<p><strong>GloVe</strong> has pre-defined word vectors for around every 6 billion words of English literature along with many other general use characters like comma, braces, and semicolons. This is created by Stanford University.</p>
+<p>There are 4 varieties available in GloVe:</p>
+<blockquote>
+<div><p>Four varieties are: <em>50d, 100d, 200d and 300d</em>.</p>
+</div></blockquote>
+<p>Here <code class="docutils literal notranslate"><span class="pre">d</span></code> stands for <strong>dimension</strong>. <em>100d</em> means, in this file each word has an equivalent vector of size 100. Glove files are simple text files in the form of a dictionary. <strong>Words are key</strong> and <strong>word vectors are values of key</strong>.</p>
+<section id="import-essential-libraries">
+<h3>Import essential libraries<a class="headerlink" href="#import-essential-libraries" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">keras.preprocessing.text</span> <span class="kn">import</span> <span class="n">Tokenizer</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="download-the-pretrained-glove-data-files">
+<h3>Download the pretrained GloVe data files<a class="headerlink" href="#download-the-pretrained-glove-data-files" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>wget http://nlp.stanford.edu/data/glove.6B.zip
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>--2023-01-11 14:45:00--  http://nlp.stanford.edu/data/glove.6B.zip
+Resolving nlp.stanford.edu (nlp.stanford.edu)... 171.64.67.140
+Connecting to nlp.stanford.edu (nlp.stanford.edu)|171.64.67.140|:80... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://nlp.stanford.edu/data/glove.6B.zip [following]
+--2023-01-11 14:45:01--  https://nlp.stanford.edu/data/glove.6B.zip
+Connecting to nlp.stanford.edu (nlp.stanford.edu)|171.64.67.140|:443... connected.
+HTTP request sent, awaiting response... 301 Moved Permanently
+Location: https://downloads.cs.stanford.edu/nlp/data/glove.6B.zip [following]
+--2023-01-11 14:45:01--  https://downloads.cs.stanford.edu/nlp/data/glove.6B.zip
+Resolving downloads.cs.stanford.edu (downloads.cs.stanford.edu)... 171.64.64.22
+Connecting to downloads.cs.stanford.edu (downloads.cs.stanford.edu)|171.64.64.22|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 862182613 (822M) [application/zip]
+Saving to: ‘glove.6B.zip’
+
+glove.6B.zip        100%[===================&gt;] 822.24M  5.01MB/s    in 2m 39s  
+
+2023-01-11 14:47:40 (5.17 MB/s) - ‘glove.6B.zip’ saved [862182613/862182613]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="unzipping-the-zipped-folder">
+<h3>Unzipping the zipped folder<a class="headerlink" href="#unzipping-the-zipped-folder" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>unzip glove*.zip
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Archive:  glove.6B.zip
+  inflating: glove.6B.50d.txt        
+  inflating: glove.6B.100d.txt       
+  inflating: glove.6B.200d.txt       
+  inflating: glove.6B.300d.txt       
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="initialising-a-tokenizer-and-fitting-it-on-the-training-dataset">
+<h3>Initialising a tokenizer and fitting it on the training dataset<a class="headerlink" href="#initialising-a-tokenizer-and-fitting-it-on-the-training-dataset" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;this is the first document&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;this document is the second document&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;this is the third one&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;is this the first document&#39;</span><span class="p">]</span>
+
+<span class="n">vocab_size</span> <span class="o">=</span> <span class="mi">8</span>
+
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">Tokenizer</span><span class="p">(</span><span class="n">num_words</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+<span class="n">tokenizer</span><span class="o">.</span><span class="n">fit_on_texts</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="opening-glove-file">
+<h3>Opening GloVe file<a class="headerlink" href="#opening-glove-file" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">glove_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;glove.6B.50d.txt&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-a-dictionary-to-store-the-embeddings">
+<h3>Creating a dictionary to store the embeddings<a class="headerlink" href="#creating-a-dictionary-to-store-the-embeddings" title="Permalink to this headline">#</a></h3>
+<p>Filling the dictionary of embeddings by reading data from the GloVe file</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embeddings_dictionary</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">glove_file</span><span class="p">:</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">word</span> <span class="o">=</span> <span class="n">records</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">vector_dimensions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+    <span class="n">embeddings_dictionary</span><span class="p">[</span><span class="n">word</span><span class="p">]</span> <span class="o">=</span> <span class="n">vector_dimensions</span>
+<span class="n">glove_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="glove-embeddings-on-our-custom-training-dataset">
+<h3>Glove embeddings on our custom training dataset<a class="headerlink" href="#glove-embeddings-on-our-custom-training-dataset" title="Permalink to this headline">#</a></h3>
+<p>Parsing through all the words in the training dataset and fetching their corresponding vectors from the dictionary and storing them in a matrix.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tokenizer</span><span class="o">.</span><span class="n">word_index</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dict_items([(&#39;this&#39;, 1), (&#39;is&#39;, 2), (&#39;the&#39;, 3), (&#39;document&#39;, 4), (&#39;first&#39;, 5), (&#39;second&#39;, 6), (&#39;third&#39;, 7), (&#39;one&#39;, 8)])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embedding_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">vocab_size</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">word_index</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">embedding_vector</span> <span class="o">=</span> <span class="n">embeddings_dictionary</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">embedding_vector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">embedding_matrix</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">embedding_vector</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="displaying-embedding-matrix">
+<h3>Displaying embedding matrix<a class="headerlink" href="#displaying-embedding-matrix" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embedding_matrix</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(8, 50)
+</pre></div>
+</div>
+</div>
+</div>
+<p>We see that each eight words in the vocabulary <span class="math notranslate nohighlight">\(V\)</span> has a word embedding of size 50.</p>
+</section>
+<section id="glove-embeddings-using-gensim">
+<h3>GloVe embeddings using gensim<a class="headerlink" href="#glove-embeddings-using-gensim" title="Permalink to this headline">#</a></h3>
+<p>The GLoVe format is slightly different – missing a 1st-line declaration of vector-count &amp; dimensions – than the format that <code class="docutils literal notranslate"><span class="pre">load_word2vec_format()</span></code> supports in gensim.</p>
+<p>You can download the <strong>GloVe pre-trained word vectors</strong> (like the one we did) and load them easily with gensim.</p>
+<p>The first step is to convert the GloVe file format to the word2vec file format. The only difference is the addition of a small header line. This can be done by calling the glove2word2vec() function. For example:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gensim.scripts.glove2word2vec</span> <span class="kn">import</span> <span class="n">glove2word2vec</span>
+
+<span class="c1"># input glove file</span>
+<span class="n">glove_input_file</span> <span class="o">=</span> <span class="s1">&#39;glove.6B.100d.txt&#39;</span>
+
+<span class="c1"># output file we want</span>
+<span class="n">word2vec_output_file</span> <span class="o">=</span> <span class="s1">&#39;glove.6B.100d.txt.word2vec&#39;</span>
+
+<span class="n">glove2word2vec</span><span class="p">(</span><span class="n">glove_input_file</span><span class="p">,</span> <span class="n">word2vec_output_file</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(400000, 100)
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we can load it and perform the same <code class="docutils literal notranslate"><span class="pre">king</span> <span class="pre">–</span> <span class="pre">man</span> <span class="pre">+</span> <span class="pre">woman</span> <span class="pre">=</span> <span class="pre">queen</span></code> test as in the <a class="reference external" href="https://pythonandml.github.io/dlbook/content/word_embeddings/word2vec.html#analogy">Word2Vec</a> (link to previous chapter). The complete code listing is provided below. Note that the converted file is ASCII format, not binary, so we set binary=False when loading.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gensim.models</span> <span class="kn">import</span> <span class="n">KeyedVectors</span>
+
+<span class="c1"># load the Stanford GloVe model</span>
+<span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;glove.6B.100d.txt.word2vec&#39;</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">KeyedVectors</span><span class="o">.</span><span class="n">load_word2vec_format</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># calculate: (king - man) + woman = ?</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">most_similar</span><span class="p">(</span><span class="n">positive</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;woman&#39;</span><span class="p">,</span> <span class="s1">&#39;king&#39;</span><span class="p">],</span> <span class="n">negative</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;man&#39;</span><span class="p">],</span> <span class="n">topn</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(&#39;queen&#39;, 0.7698541283607483)]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Running the example prints the same result of <code class="docutils literal notranslate"><span class="pre">queen</span></code>.</p>
+<p><a class="reference external" href="https://machinelearningmastery.com/develop-word-embeddings-python-gensim/">Code source for the Gensim part</a></p>
+<p><a class="reference external" href="https://studymachinelearning.com/word-embedding/">Code source for Glove embeddings on our custom training dataset</a></p>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./content/word_embeddings"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="word2vec.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">4.2.1. Word2Vec</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="fasttext.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">4.2.3. FastText</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Ujjwal Khandelwal<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

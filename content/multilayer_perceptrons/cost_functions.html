@@ -1,0 +1,1013 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>2.4. Cost functions &#8212; Oddly Satisfying Deep Learning</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../../_static/logo.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="2.5. Forward propagation" href="forward_propagation.html" />
+    <link rel="prev" title="2.3. Terminologies Part-1" href="terminologies_part_1.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">Oddly Satisfying Deep Learning</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  1. Preliminaries
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/data_preprocessing.html">
+   1.1. Data Preprocessing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/performance_metrics.html">
+   1.2. Performance Metrics for ML and DL models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  2. Multilayer Perceptrons
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="activation.html">
+   2.1. Activation Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="perceptron.html">
+   2.2. Perceptron
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="terminologies_part_1.html">
+   2.3. Terminologies Part-1
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   2.4. Cost functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="forward_propagation.html">
+   2.5. Forward propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="backpropagation.html">
+   2.6. Back Propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="terminologies_part_2.html">
+   2.7. Terminologies Part-2
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gradient_descent.html">
+   2.8. Gradient Descent
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="regularization.html">
+   2.9. Regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dropout.html">
+   2.10. Dropout regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="batch_normalization.html">
+   2.11. Batch Normalization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="numerical_example_forward_backward_propagation.html">
+   2.12. Numerical example Forward and Back pass
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="shortcut_to_calculate_forward_back_propagation.html">
+   2.13. Shortcut to calculate forward pass and backpropagation across layers
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="neural_networks_mlp_scratch_best.html">
+   2.14. MLP model from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="mlp_pytorch.html">
+   2.15. 4 step process to build MLP model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="mlp_keras.html">
+   2.16. MLP model using Tensorflow - Keras
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  3. Convolutional Neural Networks
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_over_mlp.html">
+   3.1. Convolutional Neural Networks over MLP
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_architecture.html">
+   3.2. Basic Architecture of CNN
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/convolutional_layers.html">
+     3.2.1. Convolutional layers
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/forward_propagation_convolution.html">
+     3.2.2 Forward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/backpropagation_convolution.html">
+     3.2.3 Backward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/pooling_layers.html">
+     3.2.4. Pooling layers
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_from_scratch.html">
+   3.3. Convolutional Neural Networks from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_pytorch.html">
+   3.4. 4 step process to build a CNN model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_keras.html">
+   3.5. CNN model using Tensorflow - Keras
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_state_of_the_art.html">
+   3.6. State of the art CNN models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  4. Word Embeddings
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../word_embeddings/traditional_word_embeddings.html">
+   4.1. Traditional Word Embeddings
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/static_word_embeddings.html">
+   4.2. Static Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/word2vec.html">
+     4.2.1. Word2Vec
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/glove.html">
+     4.2.2 GloVe
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/fasttext.html">
+     4.2.3. FastText
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/contextual_word_embeddings.html">
+   4.3. Contextual Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/elmo.html">
+     4.3.1. Embeddings from Language Models (ELMo)
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<div class="menu-dropdown menu-dropdown-launch-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Launch interactive content">
+      <i class="fas fa-rocket"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://mybinder.org/v2/gh/pythonandml/dlbook/master?urlpath=tree/content/multilayer_perceptrons/cost_functions.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Binder"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_binder.svg">
+  </span>
+<span class="headerbtn__text-container">Binder</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://colab.research.google.com/github/pythonandml/dlbook/blob/master/content/multilayer_perceptrons/cost_functions.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Colab"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_colab.png">
+  </span>
+<span class="headerbtn__text-container">Colab</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/pythonandml/dlbook"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/pythonandml/dlbook/issues/new?title=Issue%20on%20page%20%2Fcontent/multilayer_perceptrons/cost_functions.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="../../_sources/content/multilayer_perceptrons/cost_functions.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#validating-using-sklearn-s-mse-function">
+   Validating using sklearn’s MSE function
+  </a>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>2.4. Cost functions</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#validating-using-sklearn-s-mse-function">
+   Validating using sklearn’s MSE function
+  </a>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="cost-functions">
+<h1>2.4. Cost functions<a class="headerlink" href="#cost-functions" title="Permalink to this headline">#</a></h1>
+<p>The goal of a Neural network model (or any model) is to make as accurate predictions (<span class="math notranslate nohighlight">\(\hat{y}\)</span>) as possible. For this, we’d like an algorithm which lets us find the parameters (<strong>weights</strong> and <strong>biases</strong>) of the model so that the output from the network (<span class="math notranslate nohighlight">\(\hat{y}\)</span>) approximates <span class="math notranslate nohighlight">\(y\)</span> for the training input <span class="math notranslate nohighlight">\(X\)</span>.</p>
+<p>To quantify how well we’re achieving this goal we define a <em>cost function</em> <span class="math notranslate nohighlight">\(J(W,b)\)</span> (which is also called as <em>Loss</em> or <em>Objective</em> function) which is a function of the parameters weights <span class="math notranslate nohighlight">\(W\)</span> and biases <span class="math notranslate nohighlight">\(b\)</span>. In simple terms, a cost function is a measure of error between what value your model predicts (<span class="math notranslate nohighlight">\(\hat{y}\)</span>) and what the value actually is (<span class="math notranslate nohighlight">\(y\)</span>) and our goal is to minimize this error.</p>
+<p>We will only discuss about 2 types of cost functions (one for regression and one for classification).</p>
+<p><strong>Cost function for regression</strong></p>
+<p>In case of regression problem, we define cost function to be similar to the <strong>Mean Square Error (MSE)</strong>.</p>
+<p>Mathematically it is expressed as,</p>
+<div class="math notranslate nohighlight">
+\[
+J(W,b) = \frac{1}{2} \sum_{i=1}^m ||\hat{y}_i-y_i||^2
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(||z||\)</span> is the <span class="math notranslate nohighlight">\(L2\)</span> norm of <span class="math notranslate nohighlight">\(z\)</span>. The partial derivative of <span class="math notranslate nohighlight">\(J(W,b)\)</span> with respect to <span class="math notranslate nohighlight">\(\hat{y}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[
+\frac{\partial J(W,b)}{\partial \hat{y}} = \hat{y} - y
+\]</div>
+<p><strong>Example</strong></p>
+<p>Suppose,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+a = \begin{bmatrix}
+1 &amp; 2\\ 
+2 &amp; 0\\ 
+3 &amp; 1
+\end{bmatrix}
+\end{split}\]</div>
+<p>and</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+y = \begin{bmatrix}
+1 &amp; 1\\ 
+1 &amp; 2\\ 
+4 &amp; 3
+\end{bmatrix}
+\end{split}\]</div>
+<p>So, for <span class="math notranslate nohighlight">\(i=1, 2, 3\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+||a_i-y_i|| = \begin{bmatrix}
+\left \| [0, 1] \right \|\\ 
+\left \| [1, -2] \right \|\\ 
+\left \| [-1, -2] \right \|
+\end{bmatrix} = \begin{bmatrix}
+1\\ 
+\sqrt{5}\\ 
+\sqrt{5} 
+\end{bmatrix}
+\end{split}\]</div>
+<p>Then,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+||a_i-y_i||^2 = \begin{bmatrix}
+1\\ 
+5\\ 
+5 
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[
+J(W,b) = \frac{1}{2}\sum_{i=1}^3||a_i-y_i||^2 = \frac{1}{2}(5+5+1) = 5.5 
+\]</div>
+<p>The <em>mse(a,y)</em> function implemented below computes the cost function for regression where <span class="math notranslate nohighlight">\(a\)</span> is the predicted output (same as <span class="math notranslate nohighlight">\(\hat{y}\)</span>).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">mse</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    a: Predicted output array of shape (m, c)</span>
+<span class="sd">    y: Actual output array of shape (m, c)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us test this function on the dataset from the above example. Complete solution is listed below</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">mse</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    a: Predicted output array of shape (m, c)</span>
+<span class="sd">    y: Actual output array of shape (m, c)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+             <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span>
+             <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">]])</span>
+
+<span class="n">cost</span> <span class="o">=</span> <span class="n">mse</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cost = J(W, b) =&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cost = J(W, b) = 5.5
+</pre></div>
+</div>
+</div>
+</div>
+<section id="validating-using-sklearn-s-mse-function">
+<h2>Validating using sklearn’s MSE function<a class="headerlink" href="#validating-using-sklearn-s-mse-function" title="Permalink to this headline">#</a></h2>
+<blockquote>
+<div><p><strong>Note:</strong> Sklearn’s mean square implementation is slightly different. It divides the cost function <span class="math notranslate nohighlight">\(J(W,b)\)</span> by the number of samples <span class="math notranslate nohighlight">\(m\)</span> as well.</p>
+</div></blockquote>
+<div class="math notranslate nohighlight">
+\[
+J(W,b) = \frac{1}{2m} \sum_{i=1}^m ||\hat{y}_i-y_i||^2
+\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">mse</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    a: Predicted output array of shape (m, c)</span>
+<span class="sd">    y: Actual output array of shape (m, c)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+             <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span>
+             <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">]])</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">cost</span> <span class="o">=</span> <span class="n">mse</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cost (our function) = J(W, b) =&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cost (sklearn) = J(W, b) =&quot;</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">m</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cost (our function) = J(W, b) = 5.5
+Cost (sklearn) = J(W, b) = 5.5
+</pre></div>
+</div>
+</div>
+</div>
+<p><em>d_mse(a, y)</em> function implemented below computes the partial derivative of the cost function with <span class="math notranslate nohighlight">\(\hat{y} = a\)</span></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">d_mse</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">-</span> <span class="n">y</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Cost function for classification</strong></p>
+<p>Categorical Cross-entropy cost (also called as log loss) can be used as a loss function when optimizing classification models like neural networks.</p>
+<p>Let <span class="math notranslate nohighlight">\(c\)</span> be the number of classes in the target variable <span class="math notranslate nohighlight">\(y\)</span> and <span class="math notranslate nohighlight">\(y\)</span> is one-hot encoded. Let <span class="math notranslate nohighlight">\(a\)</span> contains the Softmax probability (i.e. the final output obtained after passing it to softmax activation) in the output layer.</p>
+<p>Mathematically it is expressed as:</p>
+<div class="math notranslate nohighlight">
+\[
+J(W,b) = -\sum_{i=1}^m \sum_{j=1}^c y_j \odot log(a_j)
+\]</div>
+<p>The partial derivative of <span class="math notranslate nohighlight">\(J(W,b)\)</span> with respect to <span class="math notranslate nohighlight">\(\hat{y} = a\)</span> is (<a class="reference external" href="https://stats.stackexchange.com/questions/277203/differentiation-of-cross-entropy">check this link</a>):</p>
+<div class="math notranslate nohighlight">
+\[
+\frac{\partial J(W,b)}{\partial \hat{y}} = \frac{\partial J(W,b)}{\partial a} = -\frac{y}{a}
+\]</div>
+<p><strong>Softmax with Categorical cross entropy loss</strong></p>
+<p>It is interesting to note that in the case of softmax activation function with categorical cross entropy loss, if <span class="math notranslate nohighlight">\(a = \text{softmax}(z)\)</span>, then the partial derivative of <span class="math notranslate nohighlight">\(J(W,b)\)</span> with respect to <span class="math notranslate nohighlight">\(z\)</span> is:</p>
+<div class="math notranslate nohighlight">
+\[
+\frac{\partial J(W,b)}{\partial z} = a - y
+\]</div>
+<p>Using the below example (in which we have <span class="math notranslate nohighlight">\(m=3\)</span> samples and <span class="math notranslate nohighlight">\(c=4\)</span> classes - target variable) we are testing the <em>cross_entropy(a, y)</em> function that we have implemented and validating the same using sklearn’s log_loss module.</p>
+<blockquote>
+<div><p><strong>Note:</strong> Sklearn’s log loss (cross entropy) implementation is slightly different. It divides the cost function <span class="math notranslate nohighlight">\(J(W,b)\)</span> by the number of samples <span class="math notranslate nohighlight">\(m\)</span> as well.</p>
+</div></blockquote>
+<div class="math notranslate nohighlight">
+\[
+J(W,b) = -\frac{1}{m}\sum_{i=1}^m \sum_{j=1}^c y_j \odot log(a_j)
+\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">log_loss</span>
+
+<span class="k">def</span> <span class="nf">cross_entropy</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    a: Predicted output array of shape (m, c)</span>
+<span class="sd">    y: Actual output array of shape (m, c)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.25</span><span class="p">],</span>
+              <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">],</span>
+              <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.6</span><span class="p">]])</span>
+
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cross Entropy cost (our function) =&quot;</span><span class="p">,</span> <span class="n">cross_entropy</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cross Entropy cost (sklearn) =&quot;</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">m</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cross Entropy cost (our function) = 4.199705077879927
+Cross Entropy cost (sklearn) = 4.199705077879927
+</pre></div>
+</div>
+</div>
+</div>
+<p><em>d_cross_entropy(a, y)</em> function implemented below computes the partial derivative of the cost function with <span class="math notranslate nohighlight">\(\hat{y} = a\)</span></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">d_cross_entropy</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">y</span><span class="o">/</span><span class="n">a</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us club all this together in a python class <em>Cost</em> whose constructor <strong>init</strong> has only one parameter (<em>cost_type</em>, which can either be ‘mse’ or ‘cross-entropy’, default value of ‘mse’)</p>
+<blockquote>
+<div><p><strong>Note:</strong> This class has a getter method for both (cost function and its partial derivative)</p>
+</div></blockquote>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Cost</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cost_type</span><span class="o">=</span><span class="s1">&#39;mse&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        cost_type: type of cost function</span>
+<span class="sd">        available options are &#39;mse&#39;, and &#39;cross-entropy&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cost_type</span> <span class="o">=</span> <span class="n">cost_type</span>
+
+    <span class="k">def</span> <span class="nf">mse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        </span>
+<span class="sd">        a: Predicted output array of shape (m, d)</span>
+<span class="sd">        y: Actual output array of shape (m, d)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">d_mse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        dJ/da</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">a</span> <span class="o">-</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">cross_entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">d_cross_entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">y</span><span class="o">/</span><span class="n">a</span>
+
+    <span class="k">def</span> <span class="nf">get_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_type</span> <span class="o">==</span> <span class="s1">&#39;mse&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mse</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_type</span> <span class="o">==</span> <span class="s1">&#39;cross-entropy&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Valid cost functions are only &#39;mse&#39;, and &#39;cross-entropy&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_d_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_type</span> <span class="o">==</span> <span class="s1">&#39;mse&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_mse</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_type</span> <span class="o">==</span> <span class="s1">&#39;cross-entropy&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_cross_entropy</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Valid cost functions are only &#39;mse&#39;, and &#39;cross-entropy&#39;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us test this class</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">log_loss</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.25</span><span class="p">],</span>
+              <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">],</span>
+              <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.6</span><span class="p">]])</span>
+
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">cost</span> <span class="o">=</span> <span class="n">Cost</span><span class="p">(</span><span class="n">cost_type</span><span class="o">=</span><span class="s1">&#39;cross-entropy&#39;</span><span class="p">)</span>
+<span class="n">cost_value</span> <span class="o">=</span> <span class="n">cost</span><span class="o">.</span><span class="n">get_cost</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">dcost</span> <span class="o">=</span> <span class="n">cost</span><span class="o">.</span><span class="n">get_d_cost</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cross Entropy cost =&quot;</span><span class="p">,</span> <span class="n">cost_value</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cross Entropy cost (sklearn) =&quot;</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="n">m</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Cost derivative =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">dcost</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cross Entropy cost = 4.199705077879927
+Cross Entropy cost (sklearn) = 4.199705077879927
+
+Cost derivative =
+
+ [[-4.          0.          0.          0.        ]
+ [ 0.          0.          0.         -3.33333333]
+ [ 0.          0.         -5.          0.        ]]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./content/multilayer_perceptrons"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="terminologies_part_1.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">2.3. Terminologies Part-1</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="forward_propagation.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">2.5. Forward propagation</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Ujjwal Khandelwal<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

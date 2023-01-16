@@ -1,0 +1,1031 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>3.6. State of the art CNN models &#8212; Oddly Satisfying Deep Learning</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../../_static/logo.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="4.1. Traditional Word Embeddings" href="../word_embeddings/traditional_word_embeddings.html" />
+    <link rel="prev" title="3.5. CNN model using Tensorflow - Keras" href="cnn_keras.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">Oddly Satisfying Deep Learning</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  1. Preliminaries
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/data_preprocessing.html">
+   1.1. Data Preprocessing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/performance_metrics.html">
+   1.2. Performance Metrics for ML and DL models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  2. Multilayer Perceptrons
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/activation.html">
+   2.1. Activation Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/perceptron.html">
+   2.2. Perceptron
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_1.html">
+   2.3. Terminologies Part-1
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/cost_functions.html">
+   2.4. Cost functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/forward_propagation.html">
+   2.5. Forward propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/backpropagation.html">
+   2.6. Back Propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_2.html">
+   2.7. Terminologies Part-2
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/gradient_descent.html">
+   2.8. Gradient Descent
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/regularization.html">
+   2.9. Regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/dropout.html">
+   2.10. Dropout regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/batch_normalization.html">
+   2.11. Batch Normalization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/numerical_example_forward_backward_propagation.html">
+   2.12. Numerical example Forward and Back pass
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/shortcut_to_calculate_forward_back_propagation.html">
+   2.13. Shortcut to calculate forward pass and backpropagation across layers
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/neural_networks_mlp_scratch_best.html">
+   2.14. MLP model from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_pytorch.html">
+   2.15. 4 step process to build MLP model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_keras.html">
+   2.16. MLP model using Tensorflow - Keras
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  3. Convolutional Neural Networks
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="cnn_over_mlp.html">
+   3.1. Convolutional Neural Networks over MLP
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="cnn_architecture.html">
+   3.2. Basic Architecture of CNN
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="convolutional_layers.html">
+     3.2.1. Convolutional layers
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="forward_propagation_convolution.html">
+     3.2.2 Forward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="backpropagation_convolution.html">
+     3.2.3 Backward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="pooling_layers.html">
+     3.2.4. Pooling layers
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="cnn_from_scratch.html">
+   3.3. Convolutional Neural Networks from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="cnn_pytorch.html">
+   3.4. 4 step process to build a CNN model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="cnn_keras.html">
+   3.5. CNN model using Tensorflow - Keras
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   3.6. State of the art CNN models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  4. Word Embeddings
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../word_embeddings/traditional_word_embeddings.html">
+   4.1. Traditional Word Embeddings
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/static_word_embeddings.html">
+   4.2. Static Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/word2vec.html">
+     4.2.1. Word2Vec
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/glove.html">
+     4.2.2 GloVe
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/fasttext.html">
+     4.2.3. FastText
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/contextual_word_embeddings.html">
+   4.3. Contextual Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/elmo.html">
+     4.3.1. Embeddings from Language Models (ELMo)
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<div class="menu-dropdown menu-dropdown-launch-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Launch interactive content">
+      <i class="fas fa-rocket"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://mybinder.org/v2/gh/pythonandml/dlbook/master?urlpath=tree/content/convolutional_neural_networks/cnn_state_of_the_art.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Binder"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_binder.svg">
+  </span>
+<span class="headerbtn__text-container">Binder</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://colab.research.google.com/github/pythonandml/dlbook/blob/master/content/convolutional_neural_networks/cnn_state_of_the_art.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Colab"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_colab.png">
+  </span>
+<span class="headerbtn__text-container">Colab</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/pythonandml/dlbook"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/pythonandml/dlbook/issues/new?title=Issue%20on%20page%20%2Fcontent/convolutional_neural_networks/cnn_state_of_the_art.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="../../_sources/content/convolutional_neural_networks/cnn_state_of_the_art.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#lenet-5">
+   1. LeNet-5
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#model-architecture">
+     Model Architecture
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#model-summary">
+     Model Summary
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#alexnet">
+   2. AlexNet
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id1">
+     Model Architecture
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id2">
+     Model Summary
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#vgg-16">
+   3. VGG-16
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id3">
+     Model Architecture
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id4">
+     Model Summary
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#inception-v1-googlenet">
+   4. Inception V1 (GoogLeNet)
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id5">
+     Model Architecture
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id6">
+     Model Summary
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#resnet-50">
+   4. ResNet-50
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#skip-connections">
+     Skip Connections
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id7">
+     Model Architecture
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id8">
+     Model Summary
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>3.6. State of the art CNN models</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#lenet-5">
+   1. LeNet-5
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#model-architecture">
+     Model Architecture
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#model-summary">
+     Model Summary
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#alexnet">
+   2. AlexNet
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id1">
+     Model Architecture
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id2">
+     Model Summary
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#vgg-16">
+   3. VGG-16
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id3">
+     Model Architecture
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id4">
+     Model Summary
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#inception-v1-googlenet">
+   4. Inception V1 (GoogLeNet)
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id5">
+     Model Architecture
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id6">
+     Model Summary
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#resnet-50">
+   4. ResNet-50
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#skip-connections">
+     Skip Connections
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id7">
+     Model Architecture
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id8">
+     Model Summary
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="state-of-the-art-cnn-models">
+<h1>3.6. State of the art CNN models<a class="headerlink" href="#state-of-the-art-cnn-models" title="Permalink to this headline">#</a></h1>
+<p>In this section, we will discuss the following <code class="docutils literal notranslate"><span class="pre">state</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">art</span></code> Convolutional neural network models:</p>
+<ol class="simple">
+<li><p>LeNet-5</p></li>
+<li><p>AlexNet</p></li>
+<li><p>VGG-16</p></li>
+<li><p>Inception V1 (GoogLeNet)</p></li>
+<li><p>ResNet-50</p></li>
+</ol>
+<p>All these models have made significant contribution to deep learning field. These models have made profound impact of image related tasks like image classification, object identification and localization, face recognition etc.</p>
+<p><img alt="" src="../../_images/cnn_state_of_the_art_compare.webp" /></p>
+<p>Image source: <a class="reference external" href="https://medium.com/&#64;RaghavPrabhu/cnn-architectures-lenet-alexnet-vgg-googlenet-and-resnet-7c81c017b848">here</a></p>
+<section id="lenet-5">
+<h2>1. LeNet-5<a class="headerlink" href="#lenet-5" title="Permalink to this headline">#</a></h2>
+<p>Lenet-5 is one of the earliest pre-trained models proposed by Yann LeCun and others in the year 1998, in the research paper <a class="reference external" href="http://yann.lecun.com/exdb/publis/pdf/lecun-01a.pdf">Gradient-Based Learning Applied to Document Recognition</a>. They used this architecture for recognizing the handwritten and machine-printed characters.</p>
+<p>The main reason behind the popularity of this model was its simple and straightforward architecture. It is a multi-layer convolution neural network for image classification.</p>
+<section id="model-architecture">
+<h3>Model Architecture<a class="headerlink" href="#model-architecture" title="Permalink to this headline">#</a></h3>
+<p><img alt="" src="../../_images/lenet.svg" /></p>
+<p>Image source: <a class="reference external" href="https://d2l.ai/chapter_convolutional-neural-networks/lenet.html#lenet">here</a></p>
+<ul class="simple">
+<li><p>The input is images of size 28 × 28</p></li>
+<li><p>C1 is the first convolutional layer with 6 convolution kernels of size 5 × 5.</p></li>
+<li><p>S2 is the pooling layer that outputs 6 channels of 14 × 14 images. The pooling window size, in this case, is a square matrix of size 2 × 2.</p></li>
+<li><p>C3 is a convolutional layer with 16 convolution kernels of size 5 × 5. Hence, the output of this layer is 16 feature images of size 10 × 10.</p></li>
+<li><p>S4 is a pooling layer with a pooling window of size 2 × 2. Hence, the dimension of images through this layer is halved, it outputs 16 feature images of size 5 × 5.</p></li>
+<li><p>F5 is the convolutional layer with 120 convolution kernels of size 5 × 5. Since the inputs of this layer have the same size as the kernel, then the output size of this layer is 1 × 1. The number of channels in output equals the channel number of kernels, which is 120. Hence the output of this layer is 120 feature images of size 1 × 1.</p></li>
+<li><p>F6 is a fully connected layer with 84 neurons which are all connected to the output of F5.</p></li>
+<li><p>The output layer consists of 10 neurons corresponding to the number of classes (numbers from 0 to 9).</p></li>
+</ul>
+</section>
+<section id="model-summary">
+<h3>Model Summary<a class="headerlink" href="#model-summary" title="Permalink to this headline">#</a></h3>
+<ul class="simple">
+<li><p>5 layers with learnable parameters.</p></li>
+<li><p>The input to the model is a grayscale image.</p></li>
+<li><p>It has 3 convolution layers, two average pooling layers, and two fully connected layers along with a softmax classifier output layer.</p></li>
+<li><p>The number of trainable parameters are 60000.</p></li>
+</ul>
+</section>
+</section>
+<section id="alexnet">
+<h2>2. AlexNet<a class="headerlink" href="#alexnet" title="Permalink to this headline">#</a></h2>
+<p>Alexnet won the Imagenet large-scale visual recognition challenge in 2012. The model was proposed in 2012 in the research paper named <a class="reference external" href="https://papers.nips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf">Imagenet Classification with Deep Convolution Neural Network</a> by Alex Krizhevsky and his colleagues.</p>
+<p>In this model, the depth of the network was increased in comparison to Lenet-5.</p>
+<section id="id1">
+<h3>Model Architecture<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h3>
+<p><img alt="" src="../../_images/alexnet.png" /></p>
+<p>Image source: <a class="reference external" href="https://anhreynolds.com/blogs/alexnet.html">here</a></p>
+<ul class="simple">
+<li><p>The input is images of size 227 × 227 × 3</p></li>
+<li><p>Conv1 is the first convolutional layer with 96 convolution kernels of size 11 × 11 × 3 and a stride of 4 (p=0).</p></li>
+<li><p>Pool1 is the first pooling layer of size 3 × 3 and a stride of 2.</p></li>
+<li><p>Conv2 is the second convolutional layer with 256 convolution kernels of size 5 × 5 × 96 and a stride of 1 (p=2).</p></li>
+<li><p>Pool2 is the first pooling layer of size 3 × 3 and a stride of 2.</p></li>
+<li><p>Conv3 is the third convolutional layer with 384 convolution kernels of size 3 × 3 × 256 and a stride of 1 (p=1).</p></li>
+<li><p>Conv4 is the fourth convolutional layer with 384 convolution kernels of size 3 × 3 × 384 and a stride of 1 (p=1).</p></li>
+<li><p>Conv5 is the fifth convolutional layer with 256 convolution kernels of size 3 × 3 × 384 and a stride of 1 (p=1).</p></li>
+<li><p>Pool5 is the first pooling layer of size 3 × 3 and a stride of 2.</p></li>
+<li><p>6th and 7th layers are fully connected layers, each has 4096 neurons (ReLU activation).</p></li>
+<li><p>8th and also last layer is a 1000 neurons softmax layer (output).</p></li>
+</ul>
+<p><strong>Note</strong></p>
+<ol class="simple">
+<li><p>Dimensions of the output are 55 × 55 × 96 after Conv 1, and 27 × 27 × 96 after Pool 1.</p></li>
+<li><p>Dimensions of the output are 27 × 27 × 256 after Conv 2, and 13 × 13 × 256 after Pool 2.</p></li>
+<li><p>Dimensions of the output are 13 × 13 × 384 after Conv 3</p></li>
+<li><p>Dimensions of the output are 13 × 13 × 384 after Conv 4</p></li>
+<li><p>Dimensions of the output are 13 × 13 × 256 after Conv 5, and 6 × 6 × 256 after Pool 5.</p></li>
+</ol>
+</section>
+<section id="id2">
+<h3>Model Summary<a class="headerlink" href="#id2" title="Permalink to this headline">#</a></h3>
+<ul class="simple">
+<li><p>It has 8 layers with learnable parameters.</p></li>
+<li><p>The input to the Model is RGB images.</p></li>
+<li><p>It has 5 convolution layers with a combination of max-pooling layers.</p></li>
+<li><p>Then it has 3 fully connected layers (including the output layer).</p></li>
+<li><p>The activation function used in all layers is Relu.</p></li>
+<li><p>It used two Dropout layers.</p></li>
+<li><p>The total number of parameters in this architecture are 62.4 million.</p></li>
+</ul>
+</section>
+</section>
+<section id="vgg-16">
+<h2>3. VGG-16<a class="headerlink" href="#vgg-16" title="Permalink to this headline">#</a></h2>
+<p>VGG16 is a type of CNN (Convolutional Neural Network) that is considered to be one of the best computer vision models to date. The creators of this model evaluated the networks and increased the depth using an architecture with very small (3 × 3) convolution filters, which showed a significant improvement on the prior state of the art configurations.</p>
+<p>It was used to win ILSVR(Imagenet) competition in 2014. The 16 in VGG16 refers to 16 layers that have weights. In VGG16 there are thirteen convolutional layers, five Max Pooling layers, and three Dense layers which sum up to 21 layers but it has only sixteen weight layers i.e., learnable parameters layer.</p>
+<section id="id3">
+<h3>Model Architecture<a class="headerlink" href="#id3" title="Permalink to this headline">#</a></h3>
+<p><img alt="" src="../../_images/vgg_16.jpeg" /></p>
+<p>Image source: <span class="xref myst">here</span></p>
+<ul class="simple">
+<li><p>The input is images of size 224 × 224 × 3. The only preprocessing it does is subtracting the mean RGB values, which are computed on the training dataset, from each pixel.</p></li>
+<li><p>Conv-1-X Layer has 64 number of filters, Conv-2-X has 128 filters, Conv-3-X has 256 filters, Conv 4-X and Conv 5-X has 512 filters.</p></li>
+<li><p>Each convolution layer has 3x3 filter with stride 1 and always used the same padding and each maxpool layer has 2x2 filter of stride 2.</p></li>
+<li><p>The two fully connected layers, each has 4096 neurons (ReLU activation)</p></li>
+<li><p>The last layer is a 1000 neurons softmax layer (output).</p></li>
+</ul>
+<p><strong>Note</strong></p>
+<ol class="simple">
+<li><p>All of the hidden layers are equipped with rectification (ReLU) non-linearity.</p></li>
+<li><p>Also, here one of the networks contains Local Response Normalization (LRN), such normalization does not improve the performance on the trained dataset, but usage of that leads to increased memory consumption and computation time.</p></li>
+</ol>
+</section>
+<section id="id4">
+<h3>Model Summary<a class="headerlink" href="#id4" title="Permalink to this headline">#</a></h3>
+<ul class="simple">
+<li><p>It has 16 layers with learnable parameters.</p></li>
+<li><p>The input to the Model is RGB images.</p></li>
+<li><p>It has 13 convolution layers with a combination of five max-pooling layers.</p></li>
+<li><p>Then it has 3 fully connected layers (including the output layer).</p></li>
+<li><p>The activation function used in all layers is ReLU.</p></li>
+<li><p>The total number of parameters in this architecture are 138 million.</p></li>
+</ul>
+</section>
+</section>
+<section id="inception-v1-googlenet">
+<h2>4. Inception V1 (GoogLeNet)<a class="headerlink" href="#inception-v1-googlenet" title="Permalink to this headline">#</a></h2>
+<p>The Inception is a deep learning model based on Convolutional Neural Networks, which is used for image classification.</p>
+<p>When multiple deep layers of convolutions were used in a model it resulted in the overfitting of the data. To avoid this from happening the inception model uses the idea of using multiple filters of different sizes on the same level. Thus in the inception models instead of having deep layers, we have parallel layers thus making our model wider rather than making it deeper.</p>
+<p>It is the winner of the ImageNet Large Scale Visual Recognition Competition in 2014, an image classification competition, which has a significant improvement over ZFNet (The winner in 2013), AlexNet (The winner in 2012) and has relatively lower error rate compared with the VGGNet (1st runner-up in 2014).</p>
+<section id="id5">
+<h3>Model Architecture<a class="headerlink" href="#id5" title="Permalink to this headline">#</a></h3>
+<p><img alt="" src="../../_images/inception.png" /></p>
+<p>Image source: <a class="reference external" href="https://www.researchgate.net/figure/Building-block-of-the-Inception-architecture-39_fig6_315454904">here</a></p>
+<p>Idea of an Inception module:</p>
+<p>Inception model uses the concept of an <code class="docutils literal notranslate"><span class="pre">Inception</span> <span class="pre">Layer</span></code> which is a combination of all those layers (namely, 1×1 Convolutional layer, 3×3 Convolutional layer, 5×5 Convolutional layer) with their output filter banks concatenated into a single output vector forming the input of the next stage.</p>
+<p>Along with the above-mentioned layers, there are two major add-ons in the original inception layer:</p>
+<ul class="simple">
+<li><p>1×1 Convolutional layer before applying another layer, which is mainly used for dimensionality reduction</p></li>
+<li><p>A parallel Max Pooling layer, which provides another option to the inception layer.</p></li>
+</ul>
+<p><img alt="" src="../../_images/googlenet.png" /></p>
+<p>Image source: <a class="reference external" href="https://www.researchgate.net/figure/The-illustration-of-the-GoogleNet-architecture-Szegedy-et-al-2015-All-convolutional_fig1_314119821">here</a></p>
+<p>Inception V1 (GoogLeNet) architecture has 22 layers in total! Using the dimension-reduced inception module, a neural network architecture is constructed. This is popularly known as GoogLeNet (Inception v1). GoogLeNet has 9 such inception modules fitted linearly. It is 22 layers deep (27, including the pooling layers). At the end of the architecture, fully connected layers were replaced by a global average pooling which calculates the average of every feature map. This indeed dramatically declines the total number of parameters.</p>
+</section>
+<section id="id6">
+<h3>Model Summary<a class="headerlink" href="#id6" title="Permalink to this headline">#</a></h3>
+<ul class="simple">
+<li><p>It has a total of 22 layers.</p></li>
+<li><p>The total number of parameters in this network are 6.8 million where the majority of the parameters is due to the inception blocks of the network.</p></li>
+</ul>
+</section>
+</section>
+<section id="resnet-50">
+<h2>4. ResNet-50<a class="headerlink" href="#resnet-50" title="Permalink to this headline">#</a></h2>
+<p>ResNet stands for Residual Network and is a specific type of convolutional neural network (CNN) introduced in the 2015 paper <a class="reference external" href="https://arxiv.org/pdf/1512.03385.pdf">Deep Residual Learning for Image Recognition</a> by He Kaiming, Zhang Xiangyu, Ren Shaoqing, and Sun Jian. CNNs are commonly used to power computer vision applications.</p>
+<p>ResNet-50 is a 50-layer convolutional neural network (48 convolutional layers, one MaxPool layer, and one average pool layer). Residual neural networks are a type of artificial neural network (ANN) that forms networks by stacking residual blocks.</p>
+<p>Convolutional Neural Networks have a major disadvantage — ‘Vanishing Gradient Problem’. During backpropagation, the value of gradient decreases significantly, thus hardly any change comes to weights. To overcome this, ResNet is used. It make use of <code class="docutils literal notranslate"><span class="pre">skip</span> <span class="pre">connections</span></code>.</p>
+<section id="skip-connections">
+<h3>Skip Connections<a class="headerlink" href="#skip-connections" title="Permalink to this headline">#</a></h3>
+<p><img alt="" src="../../_images/skip.png" /></p>
+<p>Image source: <a class="reference external" href="https://arxiv.org/pdf/1512.03385.pdf">here</a></p>
+<p>As an overview, skip connections are connections in deep neural networks that feed the output of a particular layer to later layers in the network that are not directly adjacent to the layer from which the output originated.</p>
+<p>When we introduce a skip connection that lets the initial <span class="math notranslate nohighlight">\(x\)</span> bypass all calculations in <span class="math notranslate nohighlight">\(F(x)\)</span>.</p>
+</section>
+<section id="id7">
+<h3>Model Architecture<a class="headerlink" href="#id7" title="Permalink to this headline">#</a></h3>
+<p><img alt="" src="../../_images/resnet_block_diagram.png" /></p>
+<p>Image source: <a class="reference external" href="https://programmathically.com/an-introduction-to-residual-skip-connections-and-resnets/">here</a></p>
+<p>The primary architectures that build on skip connections are <strong>ResNets</strong> and <strong>DenseNets</strong>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We have 16 residual blocks. Each residual block consists of 3 convolutional layers that transform the dimensionality of the data, as indicated in the illustration. The residual blocks form 4 groups.</p>
+</div>
+<ul class="simple">
+<li><p>The architecture takes a 224x224x3 image as input</p></li>
+<li><p>A 7×7 kernel convolution alongside 64 other kernels with a 2-sized stride.</p></li>
+<li><p>A max pooling layer with a 2-sized stride.</p></li>
+<li><p>9 more layers—3×3, 64 kernel convolution, another with 1×1, 64 kernels, and a third with 1×1, 256 kernels. These 3 layers are repeated 3 times. This is the <code class="docutils literal notranslate"><span class="pre">first</span> <span class="pre">Residual</span> <span class="pre">block</span></code>.</p></li>
+<li><p>12 more layers with 1×1, 128 kernels, 3×3, 128 kernels, and 1×1, 512 kernels, iterated 4 times. This is the <code class="docutils literal notranslate"><span class="pre">second</span> <span class="pre">Residual</span> <span class="pre">block</span></code>.</p></li>
+<li><p>18 more layers with 1×1,256 cores, and 2 cores 3×3,256 and 1×1,1024, iterated 6 times. This is the <code class="docutils literal notranslate"><span class="pre">third</span> <span class="pre">Residual</span> <span class="pre">block</span></code>.</p></li>
+<li><p>9 more layers with 1×1,512 cores, 3×3,512 cores, and 1×1,2048 cores iterated 3 times. This is the <code class="docutils literal notranslate"><span class="pre">fourth</span> <span class="pre">Residual</span> <span class="pre">block</span></code>.</p></li>
+</ul>
+<p>Lastly, the architecture performs <strong>global average pooling</strong> before feeding the feature map to a fully connected layer that distinguishes between the 1000 images used in the ImageNet database.</p>
+</section>
+<section id="id8">
+<h3>Model Summary<a class="headerlink" href="#id8" title="Permalink to this headline">#</a></h3>
+<ul class="simple">
+<li><p>It has a total of 50 layers.</p></li>
+<li><p>It makes use of skip connection.</p></li>
+<li><p>The total number of parameters in this network are ~23 million trainable parameters.</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./content/convolutional_neural_networks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="cnn_keras.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">3.5. CNN model using Tensorflow - Keras</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="../word_embeddings/traditional_word_embeddings.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">4.1. Traditional Word Embeddings</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Ujjwal Khandelwal<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

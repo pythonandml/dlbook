@@ -1,0 +1,1006 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>4.2.1. Word2Vec &#8212; Oddly Satisfying Deep Learning</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../../_static/logo.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="4.2.2 GloVe" href="glove.html" />
+    <link rel="prev" title="4.2. Static Word Embeddings" href="static_word_embeddings.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">Oddly Satisfying Deep Learning</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  1. Preliminaries
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/data_preprocessing.html">
+   1.1. Data Preprocessing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/performance_metrics.html">
+   1.2. Performance Metrics for ML and DL models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  2. Multilayer Perceptrons
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/activation.html">
+   2.1. Activation Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/perceptron.html">
+   2.2. Perceptron
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_1.html">
+   2.3. Terminologies Part-1
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/cost_functions.html">
+   2.4. Cost functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/forward_propagation.html">
+   2.5. Forward propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/backpropagation.html">
+   2.6. Back Propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_2.html">
+   2.7. Terminologies Part-2
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/gradient_descent.html">
+   2.8. Gradient Descent
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/regularization.html">
+   2.9. Regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/dropout.html">
+   2.10. Dropout regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/batch_normalization.html">
+   2.11. Batch Normalization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/numerical_example_forward_backward_propagation.html">
+   2.12. Numerical example Forward and Back pass
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/shortcut_to_calculate_forward_back_propagation.html">
+   2.13. Shortcut to calculate forward pass and backpropagation across layers
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/neural_networks_mlp_scratch_best.html">
+   2.14. MLP model from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_pytorch.html">
+   2.15. 4 step process to build MLP model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_keras.html">
+   2.16. MLP model using Tensorflow - Keras
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  3. Convolutional Neural Networks
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_over_mlp.html">
+   3.1. Convolutional Neural Networks over MLP
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_architecture.html">
+   3.2. Basic Architecture of CNN
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/convolutional_layers.html">
+     3.2.1. Convolutional layers
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/forward_propagation_convolution.html">
+     3.2.2 Forward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/backpropagation_convolution.html">
+     3.2.3 Backward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/pooling_layers.html">
+     3.2.4. Pooling layers
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_from_scratch.html">
+   3.3. Convolutional Neural Networks from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_pytorch.html">
+   3.4. 4 step process to build a CNN model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_keras.html">
+   3.5. CNN model using Tensorflow - Keras
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_state_of_the_art.html">
+   3.6. State of the art CNN models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  4. Word Embeddings
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="traditional_word_embeddings.html">
+   4.1. Traditional Word Embeddings
+  </a>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="static_word_embeddings.html">
+   4.2. Static Word Embeddings
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     4.2.1. Word2Vec
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="glove.html">
+     4.2.2 GloVe
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="fasttext.html">
+     4.2.3. FastText
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="contextual_word_embeddings.html">
+   4.3. Contextual Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="elmo.html">
+     4.3.1. Embeddings from Language Models (ELMo)
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<div class="menu-dropdown menu-dropdown-launch-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Launch interactive content">
+      <i class="fas fa-rocket"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://mybinder.org/v2/gh/pythonandml/dlbook/master?urlpath=tree/content/word_embeddings/word2vec.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Binder"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_binder.svg">
+  </span>
+<span class="headerbtn__text-container">Binder</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://colab.research.google.com/github/pythonandml/dlbook/blob/master/content/word_embeddings/word2vec.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Colab"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_colab.png">
+  </span>
+<span class="headerbtn__text-container">Colab</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/pythonandml/dlbook"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/pythonandml/dlbook/issues/new?title=Issue%20on%20page%20%2Fcontent/word_embeddings/word2vec.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="../../_sources/content/word_embeddings/word2vec.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#defining-corpus">
+   Defining Corpus
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#cbow-continuous-bag-of-words">
+   CBOW (Continuous Bag of Words)
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#skip-gram">
+   Skip Gram
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#analogy">
+   Analogy
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#word2vec-model-from-python-genism-library">
+   Word2Vec model from python genism library
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#install-the-latest-version-of-gensim">
+     Install the latest version of gensim
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#import-essential-libraries">
+     Import essential libraries
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#load-pretrained-model">
+     Load pretrained model
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#save-the-word2vec-model">
+     Save the Word2Vec model
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#load-the-word2vec-model">
+     Load the Word2Vec model
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#printing-the-most-similar-words-to-new-york-from-vocabulary-of-pretrained-model">
+     Printing the most similar words to New York from vocabulary of pretrained model
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#cosine-similarity-between-king-man-woman-and-queen">
+     Cosine similarity between
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       king
+      </span>
+      <span class="pre">
+       -
+      </span>
+      <span class="pre">
+       man
+      </span>
+      <span class="pre">
+       +
+      </span>
+      <span class="pre">
+       woman
+      </span>
+     </code>
+     and
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       queen
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>4.2.1. Word2Vec</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#defining-corpus">
+   Defining Corpus
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#cbow-continuous-bag-of-words">
+   CBOW (Continuous Bag of Words)
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#skip-gram">
+   Skip Gram
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#analogy">
+   Analogy
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#word2vec-model-from-python-genism-library">
+   Word2Vec model from python genism library
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#install-the-latest-version-of-gensim">
+     Install the latest version of gensim
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#import-essential-libraries">
+     Import essential libraries
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#load-pretrained-model">
+     Load pretrained model
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#save-the-word2vec-model">
+     Save the Word2Vec model
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#load-the-word2vec-model">
+     Load the Word2Vec model
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#printing-the-most-similar-words-to-new-york-from-vocabulary-of-pretrained-model">
+     Printing the most similar words to New York from vocabulary of pretrained model
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#cosine-similarity-between-king-man-woman-and-queen">
+     Cosine similarity between
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       king
+      </span>
+      <span class="pre">
+       -
+      </span>
+      <span class="pre">
+       man
+      </span>
+      <span class="pre">
+       +
+      </span>
+      <span class="pre">
+       woman
+      </span>
+     </code>
+     and
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       queen
+      </span>
+     </code>
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="word2vec">
+<h1>4.2.1. Word2Vec<a class="headerlink" href="#word2vec" title="Permalink to this headline">#</a></h1>
+<p><strong>Word2Vec</strong> is a prediction-based method for forming word embeddings. It is a shallow two-layered neural network that is able to predict semantics and similarities between the words.</p>
+<p>The main idea is to use a classifier to predict which words appear in the
+context of (i.e. near) a <code class="docutils literal notranslate"><span class="pre">target</span> <span class="pre">word</span></code> (or vice versa). Words that appear in similar contexts will have very similar vector representations.</p>
+<p><strong>Variants of Word2Vec:</strong> Word2Vec is a combination of two different models – <code class="docutils literal notranslate"><span class="pre">CBOW</span> <span class="pre">(Continuous</span> <span class="pre">Bag</span> <span class="pre">of</span> <span class="pre">Words)</span></code> and <code class="docutils literal notranslate"><span class="pre">Skip-gram</span></code>.</p>
+<section id="defining-corpus">
+<h2>Defining Corpus<a class="headerlink" href="#defining-corpus" title="Permalink to this headline">#</a></h2>
+<p>For illustration purpose, let’s assume that the entire corpus is composed of the <strong>English pangram</strong> (a sentence that contains all the letters of the alphabet)</p>
+<blockquote>
+<div><p>the quick brown fox jumps over the lazy dog</p>
+</div></blockquote>
+<p>To make it simple I have chosen a sentence without capitalization and punctuation. There are <span class="math notranslate nohighlight">\(9\)</span> words <span class="math notranslate nohighlight">\((T=9)\)</span>, and <span class="math notranslate nohighlight">\(8\)</span> as vocabulary <span class="math notranslate nohighlight">\(V\)</span> (set of unique words) size <span class="math notranslate nohighlight">\((|V|=8)\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note that in real life, the corpus is much bigger than just one sentence.</p>
+</div>
+</section>
+<section id="cbow-continuous-bag-of-words">
+<h2>CBOW (Continuous Bag of Words)<a class="headerlink" href="#cbow-continuous-bag-of-words" title="Permalink to this headline">#</a></h2>
+<p>In this method, given the surrounding context words based on a given <code class="docutils literal notranslate"><span class="pre">window_size</span></code>, we predict the target word. That means we will be predicting next word for a given word (or sequence of words).</p>
+<p><strong>Construct the Training examples</strong></p>
+<p>Now let’s construct our training examples, scanning through the text with a window (<code class="docutils literal notranslate"><span class="pre">window_size=3</span></code>) will prepare a context word and a target word, as follows:</p>
+<p><img alt="" src="../../_images/cbow.png" /></p>
+<p>For example, for <strong>context word</strong> <code class="docutils literal notranslate"><span class="pre">&quot;the&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;brown&quot;</span></code> the <strong>target word</strong> will be <code class="docutils literal notranslate"><span class="pre">&quot;quick&quot;</span></code>.</p>
+<p>Now these multiple context words need to be converted into one word/vector so that we can feed these into <a class="reference external" href="https://pythonandml.github.io/dlbook/content/multilayer_perceptrons/terminologies_part_1.html">neural network model</a>. To do this we will just take <strong>mean</strong> of those multiple context words (one-hot-encoded vector).</p>
+<p><img alt="" src="../../_images/cbow_nn.pbm" /></p>
+<p><a class="reference external" href="https://www.researchgate.net/figure/Architecture-of-Word2Vec-with-CBOW-technique_fig1_322709818">Image Source</a></p>
+<p>After the model is trained and the weights are updated, each column of the weights for the output matrix are the required word embeddings corresponding to each word in the vocabulary <span class="math notranslate nohighlight">\(V\)</span>.</p>
+<p>That is the word embeddings are <span class="math notranslate nohighlight">\(N\)</span>-dimensional and this <span class="math notranslate nohighlight">\(N\)</span> is nothing but the number of neurons in the hidden layer!</p>
+</section>
+<section id="skip-gram">
+<h2>Skip Gram<a class="headerlink" href="#skip-gram" title="Permalink to this headline">#</a></h2>
+<p>In this model, we use the target word (whose vector representation we want to generate) to predict the context (generated based on a given <code class="docutils literal notranslate"><span class="pre">window_size</span></code>) and in the process, we produce the representations.</p>
+<blockquote>
+<div><p>It is the complete opposite of the CBOW model.</p>
+</div></blockquote>
+<p><img alt="" src="../../_images/skipgram.png" /></p>
+<p>We input the <code class="docutils literal notranslate"><span class="pre">target</span> <span class="pre">word</span></code> into the network. The model outputs <span class="math notranslate nohighlight">\(C\)</span> probability distributions. What does this mean?</p>
+<p>For each context position, we get <span class="math notranslate nohighlight">\(C\)</span> probability distributions of <span class="math notranslate nohighlight">\(V\)</span> probabilities, one for each word where the above model takes <span class="math notranslate nohighlight">\(C\)</span> context words into the picture.</p>
+<blockquote>
+<div><p>In both the cases, the network uses back-propagation to learn. Detailed math can be found <a class="reference external" href="https://pythonandml.github.io/dlbook/content/multilayer_perceptrons/backpropagation.html">here</a>.</p>
+</div></blockquote>
+</section>
+<section id="analogy">
+<h2>Analogy<a class="headerlink" href="#analogy" title="Permalink to this headline">#</a></h2>
+<p>These embeddings capture relational meaning! The classical example of neural word embeddings:</p>
+<p><img alt="" src="../../_images/semantic_analogy.gif" /></p>
+<blockquote>
+<div><p>vector(<strong>king</strong>) - vector(<strong>man</strong>) + vector(<strong>woman</strong>) ~ vector(<strong>queen</strong>)</p>
+</div></blockquote>
+<p><img alt="" src="../../_images/king_queen.png" /></p>
+<p>The similar direction of the blue arrows indicates similar relational meaning.</p>
+</section>
+<section id="word2vec-model-from-python-genism-library">
+<h2>Word2Vec model from python genism library<a class="headerlink" href="#word2vec-model-from-python-genism-library" title="Permalink to this headline">#</a></h2>
+<blockquote>
+<div><p>Gensim is a Python library for topic modelling, document indexing and similarity retrieval with large corpora. Target audience is the natural language processing (NLP) and information retrieval (IR) community.</p>
+</div></blockquote>
+<p>Let us use pre-trained Word2Vec model from genism library in order to print the most similar words to <strong>New York</strong> from vocabulary of pretrained models.</p>
+<section id="install-the-latest-version-of-gensim">
+<h3>Install the latest version of gensim<a class="headerlink" href="#install-the-latest-version-of-gensim" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install gensim
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="import-essential-libraries">
+<h3>Import essential libraries<a class="headerlink" href="#import-essential-libraries" title="Permalink to this headline">#</a></h3>
+<blockquote>
+<div><p><strong>Note:</strong> The trained word vectors are stored in a <code class="docutils literal notranslate"><span class="pre">KeyedVectors</span></code> instance, as model.wv</p>
+</div></blockquote>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gensim</span>
+<span class="kn">import</span> <span class="nn">gensim.downloader</span> <span class="k">as</span> <span class="nn">api</span>
+<span class="kn">from</span> <span class="nn">gensim.models.keyedvectors</span> <span class="kn">import</span> <span class="n">KeyedVectors</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="load-pretrained-model">
+<h3>Load pretrained model<a class="headerlink" href="#load-pretrained-model" title="Permalink to this headline">#</a></h3>
+<p>Use gensim to load a <code class="docutils literal notranslate"><span class="pre">word2vec</span></code> model pretrained on google news and perform some simple actions with the word vectors (<span class="math notranslate nohighlight">\(300\)</span> represents the dimension of the word vectors).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;word2vec-google-news-300&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[==================================================] 100.0% 1662.8/1662.8MB downloaded
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="save-the-word2vec-model">
+<h3>Save the Word2Vec model<a class="headerlink" href="#save-the-word2vec-model" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">save_word2vec_format</span><span class="p">(</span><span class="s1">&#39;word2vec.bin&#39;</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="load-the-word2vec-model">
+<h3>Load the Word2Vec model<a class="headerlink" href="#load-the-word2vec-model" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">KeyedVectors</span><span class="o">.</span><span class="n">load_word2vec_format</span><span class="p">(</span><span class="s1">&#39;word2vec.bin&#39;</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="printing-the-most-similar-words-to-new-york-from-vocabulary-of-pretrained-model">
+<h3>Printing the most similar words to New York from vocabulary of pretrained model<a class="headerlink" href="#printing-the-most-similar-words-to-new-york-from-vocabulary-of-pretrained-model" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">most_similar</span><span class="p">(</span><span class="s1">&#39;New_York&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(&#39;NewYork&#39;, 0.7444177865982056),
+ (&#39;Manhattan&#39;, 0.6598774194717407),
+ (&#39;theNew_York&#39;, 0.6500560641288757),
+ (&#39;NY&#39;, 0.6273693442344666),
+ (&#39;Brooklyn&#39;, 0.6272951364517212),
+ (&#39;Long_Island&#39;, 0.626175582408905),
+ (&#39;NYC&#39;, 0.6110411286354065),
+ (&#39;inNew_York&#39;, 0.608241617679596),
+ (&#39;upstate&#39;, 0.604249119758606),
+ (&#39;RBI_ARodriguez&#39;, 0.6038434505462646)]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="cosine-similarity-between-king-man-woman-and-queen">
+<h3><a class="reference external" href="https://pythonandml.github.io/dlbook/content/word_embeddings/static_word_embeddings.html">Cosine similarity</a> between <code class="docutils literal notranslate"><span class="pre">king</span> <span class="pre">-</span> <span class="pre">man</span> <span class="pre">+</span> <span class="pre">woman</span></code> and <code class="docutils literal notranslate"><span class="pre">queen</span></code><a class="headerlink" href="#cosine-similarity-between-king-man-woman-and-queen" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">cosine_similarity</span>
+
+<span class="n">lhs</span> <span class="o">=</span> <span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="s1">&#39;king&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;man&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;woman&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">rhs</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;queen&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cosine Similarity between &#39;king - man + woman&#39; and &#39;queen&#39; =&quot;</span><span class="p">,</span> <span class="n">cosine_similarity</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cosine Similarity between &#39;king - man + woman&#39; and &#39;queen&#39; = 0.7300518
+</pre></div>
+</div>
+</div>
+</div>
+<p>We have a very high similarity score (as expected)!</p>
+<p><strong>Below is one interesting visualisation of word2vec</strong></p>
+<p><img alt="" src="../../_images/word2vec_apple.webp" /></p>
+<p><a class="reference external" href="https://www.analyticsvidhya.com/blog/2017/06/word-embeddings-count-word2veec/">Image Source</a></p>
+<p>The above image is a <code class="docutils literal notranslate"><span class="pre">t-SNE</span> <span class="pre">representation</span></code> of word vectors in 2 dimension and you can see that <strong>two contexts of apple</strong> have been captured. <em>One is a fruit and the other company</em>.</p>
+<p>The above explanation is a very basic one just to make you familiar with how <code class="docutils literal notranslate"><span class="pre">Word2vec</span></code> works. But there’s a lot more to it. For example, to make the algorithm computationally more efficient, methods like <strong>Hierarchical Softmax</strong> and <strong>Skip-Gram Negative Sampling</strong> are used. You can read about them in these beautiful posts (<a class="reference external" href="https://aegis4048.github.io/optimize_computational_efficiency_of_skip-gram_with_negative_sampling">1</a> and <a class="reference external" href="https://aegis4048.github.io/demystifying_neural_network_in_skip_gram_language_modeling#weight_matrix">2</a>, links to an external site).</p>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./content/word_embeddings"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="static_word_embeddings.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">4.2. Static Word Embeddings</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="glove.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">4.2.2 GloVe</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Ujjwal Khandelwal<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

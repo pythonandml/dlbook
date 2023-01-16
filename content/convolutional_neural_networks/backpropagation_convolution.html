@@ -1,0 +1,1264 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>3.2.3 Backward Propagation Convolution layer (Vectorized) &#8212; Oddly Satisfying Deep Learning</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../../_static/logo.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="3.2.4. Pooling layers" href="pooling_layers.html" />
+    <link rel="prev" title="3.2.2 Forward Propagation Convolution layer (Vectorized)" href="forward_propagation_convolution.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">Oddly Satisfying Deep Learning</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  1. Preliminaries
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/data_preprocessing.html">
+   1.1. Data Preprocessing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/performance_metrics.html">
+   1.2. Performance Metrics for ML and DL models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  2. Multilayer Perceptrons
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/activation.html">
+   2.1. Activation Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/perceptron.html">
+   2.2. Perceptron
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_1.html">
+   2.3. Terminologies Part-1
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/cost_functions.html">
+   2.4. Cost functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/forward_propagation.html">
+   2.5. Forward propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/backpropagation.html">
+   2.6. Back Propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_2.html">
+   2.7. Terminologies Part-2
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/gradient_descent.html">
+   2.8. Gradient Descent
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/regularization.html">
+   2.9. Regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/dropout.html">
+   2.10. Dropout regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/batch_normalization.html">
+   2.11. Batch Normalization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/numerical_example_forward_backward_propagation.html">
+   2.12. Numerical example Forward and Back pass
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/shortcut_to_calculate_forward_back_propagation.html">
+   2.13. Shortcut to calculate forward pass and backpropagation across layers
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/neural_networks_mlp_scratch_best.html">
+   2.14. MLP model from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_pytorch.html">
+   2.15. 4 step process to build MLP model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_keras.html">
+   2.16. MLP model using Tensorflow - Keras
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  3. Convolutional Neural Networks
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="cnn_over_mlp.html">
+   3.1. Convolutional Neural Networks over MLP
+  </a>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="cnn_architecture.html">
+   3.2. Basic Architecture of CNN
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2">
+    <a class="reference internal" href="convolutional_layers.html">
+     3.2.1. Convolutional layers
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="forward_propagation_convolution.html">
+     3.2.2 Forward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     3.2.3 Backward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="pooling_layers.html">
+     3.2.4. Pooling layers
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="cnn_from_scratch.html">
+   3.3. Convolutional Neural Networks from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="cnn_pytorch.html">
+   3.4. 4 step process to build a CNN model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="cnn_keras.html">
+   3.5. CNN model using Tensorflow - Keras
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="cnn_state_of_the_art.html">
+   3.6. State of the art CNN models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  4. Word Embeddings
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../word_embeddings/traditional_word_embeddings.html">
+   4.1. Traditional Word Embeddings
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/static_word_embeddings.html">
+   4.2. Static Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/word2vec.html">
+     4.2.1. Word2Vec
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/glove.html">
+     4.2.2 GloVe
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/fasttext.html">
+     4.2.3. FastText
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/contextual_word_embeddings.html">
+   4.3. Contextual Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/elmo.html">
+     4.3.1. Embeddings from Language Models (ELMo)
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<div class="menu-dropdown menu-dropdown-launch-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Launch interactive content">
+      <i class="fas fa-rocket"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://mybinder.org/v2/gh/pythonandml/dlbook/master?urlpath=tree/content/convolutional_neural_networks/backpropagation_convolution.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Binder"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_binder.svg">
+  </span>
+<span class="headerbtn__text-container">Binder</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://colab.research.google.com/github/pythonandml/dlbook/blob/master/content/convolutional_neural_networks/backpropagation_convolution.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Colab"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_colab.png">
+  </span>
+<span class="headerbtn__text-container">Colab</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/pythonandml/dlbook"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/pythonandml/dlbook/issues/new?title=Issue%20on%20page%20%2Fcontent/convolutional_neural_networks/backpropagation_convolution.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="../../_sources/content/convolutional_neural_networks/backpropagation_convolution.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#procedure">
+   Procedure
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#gradient-dx">
+     Gradient
+     <span class="math notranslate nohighlight">
+      \(dX\)
+     </span>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#gradient-dk">
+     Gradient
+     <span class="math notranslate nohighlight">
+      \(dK\)
+     </span>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#gradient-db">
+     Gradient db
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#code-time">
+   Code time
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#dilation">
+     Dilation
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#backpropagation">
+     Backpropagation
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>3.2.3 Backward Propagation Convolution layer (Vectorized)</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#procedure">
+   Procedure
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#gradient-dx">
+     Gradient
+     <span class="math notranslate nohighlight">
+      \(dX\)
+     </span>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#gradient-dk">
+     Gradient
+     <span class="math notranslate nohighlight">
+      \(dK\)
+     </span>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#gradient-db">
+     Gradient db
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#code-time">
+   Code time
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#dilation">
+     Dilation
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#backpropagation">
+     Backpropagation
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="backward-propagation-convolution-layer-vectorized">
+<h1>3.2.3 Backward Propagation Convolution layer (Vectorized)<a class="headerlink" href="#backward-propagation-convolution-layer-vectorized" title="Permalink to this headline">#</a></h1>
+<p>Now let us write (step by step) most general vectorized code using numpy (no loops will be used) to perform <code class="docutils literal notranslate"><span class="pre">backward</span> <span class="pre">propagation</span></code> on the convolution layer.</p>
+<blockquote>
+<div><p><strong>Note:</strong> The notations used can be found in the previous <a class="reference external" href="https://pythonandml.github.io/dlbook/content/convolutional_neural_networks/convolutional_layers.html#notations">section</a> (link to previous section).</p>
+</div></blockquote>
+<section id="procedure">
+<h2>Procedure<a class="headerlink" href="#procedure" title="Permalink to this headline">#</a></h2>
+<p><img alt="" src="../../_images/convolution_layer.png" /></p>
+<p>We are given the error <span class="math notranslate nohighlight">\(dZ\)</span> (partial derivative of the cost function <span class="math notranslate nohighlight">\(J\)</span> with respect to the output <span class="math notranslate nohighlight">\(Z\)</span>) and we need to find <span class="math notranslate nohighlight">\(dX\)</span>, <span class="math notranslate nohighlight">\(dK\)</span> and <span class="math notranslate nohighlight">\(db\)</span> (Input and parameter gradients). I will not be going into the details of the derivation of Backpropagation (you can find it <a class="reference external" href="https://medium.com/&#64;mayank.utexas/backpropagation-for-convolution-with-strides-8137e4fc2710">here</a> in detail).</p>
+<section id="gradient-dx">
+<h3>Gradient <span class="math notranslate nohighlight">\(dX\)</span><a class="headerlink" href="#gradient-dx" title="Permalink to this headline">#</a></h3>
+<p>In order to obtain <span class="math notranslate nohighlight">\(dX\)</span>, it turns out that the <code class="docutils literal notranslate"><span class="pre">backpropagation</span> <span class="pre">operation</span></code> is identical to a <code class="docutils literal notranslate"><span class="pre">stride</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">convolution</span></code> of a <strong>padded, dilated version of the output gradient <span class="math notranslate nohighlight">\(dZ\)</span></strong> with a <strong>180 degrees rotated version of the filter <span class="math notranslate nohighlight">\(K\)</span></strong></p>
+<p>This means, suppose following are the input matrix <span class="math notranslate nohighlight">\(X\)</span>, kernel matrix <span class="math notranslate nohighlight">\(K\)</span> and output gradient of the layer <span class="math notranslate nohighlight">\(dZ\)</span>:</p>
+<p><img alt="" src="../../_images/backprop.png" /></p>
+<p>Then, dilation of <span class="math notranslate nohighlight">\(dZ\)</span> will be (with dilation rate <span class="math notranslate nohighlight">\((d_h, d_w)=(s_h, s_w)\)</span>):</p>
+<p><img alt="" src="../../_images/dilated_dZ.png" /></p>
+<p>Now, in order to pad the dilated <span class="math notranslate nohighlight">\(dZ\)</span>, we calculate the (<span class="math notranslate nohighlight">\(p_t\)</span>, <span class="math notranslate nohighlight">\(p_b\)</span>, <span class="math notranslate nohighlight">\(p_l\)</span>, <span class="math notranslate nohighlight">\(p_r\)</span>) (follow <a class="reference external" href="https://pythonandml.github.io/dlbook/content/convolutional_neural_networks/convolutional_layers.html#notations">notations</a>) as follows:</p>
+<p><span class="math notranslate nohighlight">\(p_h = N_h - D_h + K_h - 1\)</span> and <span class="math notranslate nohighlight">\(p_w = N_w - D_w + K_w - 1\)</span></p>
+<div class="math notranslate nohighlight">
+\[p_t = \left \lfloor \frac{p_h}{2} \right \rfloor\]</div>
+<div class="math notranslate nohighlight">
+\[p_b = \left \lfloor \frac{p_h+1}{2} \right \rfloor\]</div>
+<div class="math notranslate nohighlight">
+\[p_l = \left \lfloor \frac{p_w}{2} \right \rfloor\]</div>
+<div class="math notranslate nohighlight">
+\[p_r = \left \lfloor \frac{p_w+1}{2} \right \rfloor\]</div>
+<p><img alt="" src="../../_images/dilated_padded_dZ.png" /></p>
+<p>Next, we’re also going to make one modification to the filter (rotate it by 180 degrees):</p>
+<p><img alt="" src="../../_images/rot_180_K.png" /></p>
+<p>Thats it! Just convolve this padded and dilated <span class="math notranslate nohighlight">\(dZ\)</span> with the rotated Kernel (stride=1) and we have our <span class="math notranslate nohighlight">\(dX\)</span>.</p>
+</section>
+<section id="gradient-dk">
+<h3>Gradient <span class="math notranslate nohighlight">\(dK\)</span><a class="headerlink" href="#gradient-dk" title="Permalink to this headline">#</a></h3>
+<p>In order to obtain <span class="math notranslate nohighlight">\(dK\)</span>, it turns out that the <code class="docutils literal notranslate"><span class="pre">backpropagation</span> <span class="pre">operation</span></code> is identical to a <code class="docutils literal notranslate"><span class="pre">stride</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">convolution</span></code> operation of the <strong>input <span class="math notranslate nohighlight">\(X\)</span></strong> with a <strong>dilated version of the output gradient <span class="math notranslate nohighlight">\(dZ\)</span></strong></p>
+<p>We already have our input <span class="math notranslate nohighlight">\(X\)</span> and dilated output gradient <span class="math notranslate nohighlight">\(dZ\)</span>. Just convolve it with stride=1.</p>
+<p><img alt="" src="../../_images/input_dilated_dZ.png" /></p>
+</section>
+<section id="gradient-db">
+<h3>Gradient db<a class="headerlink" href="#gradient-db" title="Permalink to this headline">#</a></h3>
+<p>Just sum the gradient <span class="math notranslate nohighlight">\(dZ\)</span> along the batch axis and we have <span class="math notranslate nohighlight">\(db\)</span></p>
+<div class="math notranslate nohighlight">
+\[db = \sum_{i=1}^m dZ_i \]</div>
+</section>
+</section>
+<section id="code-time">
+<h2>Code time<a class="headerlink" href="#code-time" title="Permalink to this headline">#</a></h2>
+<section id="dilation">
+<h3>Dilation<a class="headerlink" href="#dilation" title="Permalink to this headline">#</a></h3>
+<p>Let us create a function <code class="docutils literal notranslate"><span class="pre">dilate2D(X,</span> <span class="pre">Dr)</span></code> (where <strong>Dr is the dilation rate</strong>) which dilates the matrix <span class="math notranslate nohighlight">\(X\)</span></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">dilate2D</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Dr</span><span class="p">):</span>
+    <span class="n">dh</span><span class="p">,</span> <span class="n">dw</span> <span class="o">=</span> <span class="n">Dr</span> <span class="c1"># Dilate rate</span>
+    <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">Xd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">arr</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">W</span><span class="p">),</span> <span class="n">dw</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">values</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">Xd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">arr</span><span class="o">=</span><span class="n">Xd</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">H</span><span class="p">),</span> <span class="n">dh</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">values</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Xd</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Let us test this function on some <span class="math notranslate nohighlight">\(X\)</span> with <code class="docutils literal notranslate"><span class="pre">Dr=(2,3)</span></code></strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">],</span>
+              <span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;X = </span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="n">Dr</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># Dilation rate</span>
+
+<span class="n">Xd</span> <span class="o">=</span> <span class="n">dilate2D</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Dr</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Xd (Dilated) = </span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">Xd</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>X = 
+
+ [[1 2 3 4 5]
+ [4 5 6 7 8]
+ [5 6 7 8 9]] 
+
+Xd (Dilated) = 
+
+ [[1 0 0 2 0 0 3 0 0 4 0 0 5]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [4 0 0 5 0 0 6 0 0 7 0 0 8]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [5 0 0 6 0 0 7 0 0 8 0 0 9]] 
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Adding a batch of tensor as input with multiple channels for dilation</strong></p>
+<p>The function for such an input will be <code class="docutils literal notranslate"><span class="pre">dilate2D_with_channels_batch(X,</span> <span class="pre">Dr)</span></code></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">dilate2D_with_channels_batch</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Dr</span><span class="p">):</span>
+    <span class="n">dh</span><span class="p">,</span> <span class="n">dw</span> <span class="o">=</span> <span class="n">Dr</span> <span class="c1"># Dilate rate</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">Xd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">arr</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">W</span><span class="p">),</span> <span class="n">dw</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">values</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">Xd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">arr</span><span class="o">=</span><span class="n">Xd</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">H</span><span class="p">),</span> <span class="n">dh</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">values</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Xd</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Testing time</strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="n">Dr</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">Xd</span> <span class="o">=</span> <span class="n">dilate2D_with_channels_batch</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Dr</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;X = </span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Xd = </span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">Xd</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>X = 
+
+ [[[[9 4 0]
+   [1 9 0]
+   [1 8 9]]
+
+  [[0 8 6]
+   [4 3 0]
+   [4 6 8]]]
+
+
+ [[[1 8 4]
+   [1 3 6]
+   [5 3 9]]
+
+  [[6 9 1]
+   [9 4 2]
+   [6 7 8]]]] 
+
+Xd = 
+
+ [[[[9 0 0 4 0 0 0]
+   [0 0 0 0 0 0 0]
+   [1 0 0 9 0 0 0]
+   [0 0 0 0 0 0 0]
+   [1 0 0 8 0 0 9]]
+
+  [[0 0 0 8 0 0 6]
+   [0 0 0 0 0 0 0]
+   [4 0 0 3 0 0 0]
+   [0 0 0 0 0 0 0]
+   [4 0 0 6 0 0 8]]]
+
+
+ [[[1 0 0 8 0 0 4]
+   [0 0 0 0 0 0 0]
+   [1 0 0 3 0 0 6]
+   [0 0 0 0 0 0 0]
+   [5 0 0 3 0 0 9]]
+
+  [[6 0 0 9 0 0 1]
+   [0 0 0 0 0 0 0]
+   [9 0 0 4 0 0 2]
+   [0 0 0 0 0 0 0]
+   [6 0 0 7 0 0 8]]]] 
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="backpropagation">
+<h3>Backpropagation<a class="headerlink" href="#backpropagation" title="Permalink to this headline">#</a></h3>
+<p>Now that we have dilation function and forward convolution function developed <span class="xref myst">here</span>(link to previous chapter), we can easily backpropagate to obtain the gradients.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">pad_input2D_with_channels_batch_and_many_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="s1">&#39;valid&#39;</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">==</span><span class="nb">int</span><span class="p">:</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Nh</span><span class="p">,</span> <span class="n">Nw</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">pt</span><span class="p">,</span> <span class="n">pb</span> <span class="o">=</span> <span class="n">p</span><span class="p">,</span> <span class="n">p</span>
+        <span class="n">pl</span><span class="p">,</span> <span class="n">pr</span> <span class="o">=</span> <span class="n">p</span><span class="p">,</span> <span class="n">p</span>
+        
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">==</span><span class="nb">tuple</span><span class="p">:</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Nh</span><span class="p">,</span> <span class="n">Nw</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">ph</span><span class="p">,</span> <span class="n">pw</span> <span class="o">=</span> <span class="n">p</span>
+        
+        <span class="n">pt</span><span class="p">,</span> <span class="n">pb</span> <span class="o">=</span> <span class="n">ph</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">ph</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+        <span class="n">pl</span><span class="p">,</span> <span class="n">pr</span> <span class="o">=</span> <span class="n">pw</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">pw</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+    
+    <span class="k">elif</span> <span class="n">p</span><span class="o">==</span><span class="s1">&#39;valid&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">X</span>
+    
+    <span class="k">elif</span> <span class="n">p</span><span class="o">==</span><span class="s1">&#39;same&#39;</span><span class="p">:</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Nh</span><span class="p">,</span> <span class="n">Nw</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">F</span><span class="p">,</span> <span class="n">Kc</span><span class="p">,</span> <span class="n">Kh</span><span class="p">,</span> <span class="n">Kw</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">shape</span> <span class="c1"># F = number of filters</span>
+        <span class="n">sh</span><span class="p">,</span> <span class="n">sw</span> <span class="o">=</span> <span class="n">s</span>
+
+        <span class="n">ph</span> <span class="o">=</span> <span class="p">(</span><span class="n">sh</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">Nh</span> <span class="o">+</span> <span class="n">Kh</span> <span class="o">-</span> <span class="n">sh</span>
+        <span class="n">pw</span> <span class="o">=</span> <span class="p">(</span><span class="n">sw</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">Nw</span> <span class="o">+</span> <span class="n">Kw</span> <span class="o">-</span> <span class="n">sw</span>
+
+        <span class="n">pt</span><span class="p">,</span> <span class="n">pb</span> <span class="o">=</span> <span class="n">ph</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">ph</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+        <span class="n">pl</span><span class="p">,</span> <span class="n">pr</span> <span class="o">=</span> <span class="n">pw</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">pw</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incorrect padding type. Allowed types are only &#39;same&#39;, &#39;valid&#39;, an integer or a tuple.&quot;</span><span class="p">)</span>
+
+    <span class="n">zeros_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Nh</span><span class="p">,</span> <span class="n">pr</span><span class="p">))</span>
+    <span class="n">zeros_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Nh</span><span class="p">,</span> <span class="n">pl</span><span class="p">))</span>
+    <span class="n">zeros_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">pt</span><span class="p">,</span> <span class="n">Nw</span><span class="o">+</span><span class="n">pl</span><span class="o">+</span><span class="n">pr</span><span class="p">))</span>
+    <span class="n">zeros_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">pb</span><span class="p">,</span> <span class="n">Nw</span><span class="o">+</span><span class="n">pl</span><span class="o">+</span><span class="n">pr</span><span class="p">))</span>
+
+    <span class="n">Xp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">zeros_r</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">Xp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">zeros_l</span><span class="p">,</span> <span class="n">Xp</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">Xp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">zeros_t</span><span class="p">,</span> <span class="n">Xp</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">Xp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">Xp</span><span class="p">,</span> <span class="n">zeros_b</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Xp</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">conv2d_with_channels_batch_and_many_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="s1">&#39;valid&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;front&#39;</span><span class="p">):</span>
+    
+    <span class="c1"># padding</span>
+    <span class="n">Xp</span> <span class="o">=</span> <span class="n">pad_input2D_with_channels_batch_and_many_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+    
+    <span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Nh</span><span class="p">,</span> <span class="n">Nw</span> <span class="o">=</span> <span class="n">Xp</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">F</span><span class="p">,</span> <span class="n">Kc</span><span class="p">,</span> <span class="n">Kh</span><span class="p">,</span> <span class="n">Kw</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">shape</span> <span class="c1"># F = number of filters</span>
+    <span class="n">sh</span><span class="p">,</span> <span class="n">sw</span> <span class="o">=</span> <span class="n">s</span> <span class="c1"># strides along height and width</span>
+
+    <span class="n">Oh</span> <span class="o">=</span> <span class="p">(</span><span class="n">Nh</span><span class="o">-</span><span class="n">Kh</span><span class="p">)</span><span class="o">//</span><span class="n">sh</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">Ow</span> <span class="o">=</span> <span class="p">(</span><span class="n">Nw</span><span class="o">-</span><span class="n">Kw</span><span class="p">)</span><span class="o">//</span><span class="n">sw</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">strides</span> <span class="o">=</span> <span class="p">(</span><span class="n">Nc</span><span class="o">*</span><span class="n">Nh</span><span class="o">*</span><span class="n">Nw</span><span class="p">,</span> <span class="n">Nw</span><span class="o">*</span><span class="n">Nh</span><span class="p">,</span> <span class="n">Nw</span><span class="o">*</span><span class="n">sh</span><span class="p">,</span> <span class="n">sw</span><span class="p">,</span> <span class="n">Nw</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">strides</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">Xp</span><span class="o">.</span><span class="n">itemsize</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">strides</span><span class="p">)</span>
+
+    <span class="n">subM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">stride_tricks</span><span class="o">.</span><span class="n">as_strided</span><span class="p">(</span><span class="n">Xp</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Oh</span><span class="p">,</span> <span class="n">Ow</span><span class="p">,</span> <span class="n">Kh</span><span class="p">,</span> <span class="n">Kw</span><span class="p">),</span>
+                                            <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">mode</span><span class="o">==</span><span class="s1">&#39;front&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;fckl,mcijkl-&gt;mfij&#39;</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">subM</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span><span class="o">==</span><span class="s1">&#39;back&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;fdkl,mcijkl-&gt;mdij&#39;</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">subM</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">mode</span><span class="o">==</span><span class="s1">&#39;param&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;mfkl,mcijkl-&gt;fcij&#39;</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">subM</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Gradient <span class="math notranslate nohighlight">\(dX\)</span></strong></p>
+<p><strong>Forward Propagation</strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">36</span><span class="p">,</span><span class="mi">47</span><span class="p">))</span>
+
+<span class="c1"># different Kernel for each channel and many such Kernels</span>
+<span class="n">K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+
+<span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="n">Xp</span> <span class="o">=</span> <span class="n">pad_input2D_with_channels_batch_and_many_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)</span>
+
+<span class="n">Z</span> <span class="o">=</span> <span class="n">conv2d_with_channels_batch_and_many_filters</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)</span>
+
+<span class="n">Z</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(256, 2, 36, 47)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Given Gradient of output dZ</span>
+<span class="n">dZ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="c1"># Dilate dZ</span>
+<span class="n">dZ_D</span> <span class="o">=</span> <span class="n">dilate2D_with_channels_batch</span><span class="p">(</span><span class="n">dZ</span><span class="p">,</span> <span class="n">Dr</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
+
+<span class="c1"># Pad the dilated dZ</span>
+
+<span class="n">m</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">Hd</span><span class="p">,</span> <span class="n">Wd</span> <span class="o">=</span> <span class="n">dZ_D</span><span class="o">.</span><span class="n">shape</span>
+
+<span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Nh</span><span class="p">,</span> <span class="n">Nw</span> <span class="o">=</span> <span class="n">Xp</span><span class="o">.</span><span class="n">shape</span>
+
+<span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Nhx</span><span class="p">,</span> <span class="n">Nwx</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+
+<span class="n">F</span><span class="p">,</span> <span class="n">Kc</span><span class="p">,</span> <span class="n">Kh</span><span class="p">,</span> <span class="n">Kw</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">shape</span>
+
+<span class="n">ph</span> <span class="o">=</span> <span class="n">Nh</span> <span class="o">-</span> <span class="n">Hd</span> <span class="o">+</span> <span class="n">Kh</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">pw</span> <span class="o">=</span> <span class="n">Nw</span> <span class="o">-</span> <span class="n">Wd</span> <span class="o">+</span> <span class="n">Kw</span> <span class="o">-</span> <span class="mi">1</span>
+
+<span class="n">dZ_Dp</span> <span class="o">=</span> <span class="n">pad_input2D_with_channels_batch_and_many_filters</span><span class="p">(</span><span class="n">dZ_D</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">(</span><span class="n">ph</span><span class="p">,</span> <span class="n">pw</span><span class="p">))</span>
+
+<span class="n">dZ_Dp</span><span class="o">.</span><span class="n">shape</span> <span class="c1"># padding it to make its size same as Xp (padded X).</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(256, 2, 254, 199)
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Rotation by 180 degrees</strong></p>
+<p>This is just a one line implementation</p>
+<p><strong>Example</strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">K1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">K1</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[1, 2, 3],
+       [4, 5, 6],
+       [7, 8, 9]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">K1_rotate_180</span> <span class="o">=</span> <span class="n">K1</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">K1_rotate_180</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[9, 8, 7],
+       [6, 5, 4],
+       [3, 2, 1]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Kr</span> <span class="o">=</span> <span class="n">K</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">Kr</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[[[7, 0, 3, 7, 0, 8, 2, 0],
+         [8, 7, 9, 5, 4, 1, 6, 6],
+         [1, 7, 2, 9, 0, 0, 1, 8],
+         [7, 8, 2, 1, 0, 0, 2, 6],
+         [3, 6, 6, 4, 8, 9, 0, 0]]],
+
+
+       [[[9, 0, 2, 5, 1, 0, 6, 6],
+         [9, 1, 5, 3, 8, 5, 7, 0],
+         [0, 9, 3, 0, 2, 9, 3, 4],
+         [6, 2, 1, 9, 6, 3, 8, 6],
+         [6, 5, 6, 0, 5, 7, 8, 3]]]])
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Finally it is time for convolution</strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sb</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">dXp</span> <span class="o">=</span> <span class="n">conv2d_with_channels_batch_and_many_filters</span><span class="p">(</span><span class="n">dZ_Dp</span><span class="p">,</span> <span class="n">Kr</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">sb</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="s1">&#39;valid&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;back&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dXp</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(256, 1, 250, 192)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Xp</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(256, 1, 250, 192)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(256, 1, 36, 47)
+</pre></div>
+</div>
+</div>
+</div>
+<p>We need a small function such that we can extract the original input errors from the padding ones. This you can consider as <strong>backpropagation through padding operation</strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">padding2D_backwards_with_channels_batch</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Xp</span><span class="p">,</span> <span class="n">dXp</span><span class="p">):</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Nh</span><span class="p">,</span> <span class="n">Nw</span> <span class="o">=</span> <span class="n">Xp</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">Nc</span><span class="p">,</span> <span class="n">Nhx</span><span class="p">,</span> <span class="n">Nwx</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">ph</span> <span class="o">=</span> <span class="n">Nh</span> <span class="o">-</span> <span class="n">Nhx</span>
+    <span class="n">pw</span> <span class="o">=</span> <span class="n">Nw</span> <span class="o">-</span> <span class="n">Nwx</span>
+    <span class="n">pt</span><span class="p">,</span> <span class="n">pb</span> <span class="o">=</span> <span class="n">ph</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">ph</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+    <span class="n">pl</span><span class="p">,</span> <span class="n">pr</span> <span class="o">=</span> <span class="n">pw</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">pw</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+    <span class="n">dX</span> <span class="o">=</span> <span class="n">dXp</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">pt</span><span class="p">:</span><span class="n">pt</span><span class="o">+</span><span class="n">Nhx</span><span class="p">,</span> <span class="n">pl</span><span class="p">:</span><span class="n">pl</span><span class="o">+</span><span class="n">Nwx</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">dX</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dX</span> <span class="o">=</span> <span class="n">padding2D_backwards_with_channels_batch</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Xp</span><span class="p">,</span> <span class="n">dXp</span><span class="p">)</span>
+<span class="n">dX</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(256, 1, 36, 47)
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Gradient <span class="math notranslate nohighlight">\(dK\)</span></strong></p>
+<p>We have <code class="docutils literal notranslate"><span class="pre">dZ_D</span> <span class="pre">=</span> <span class="pre">Dilated</span> <span class="pre">output</span> <span class="pre">gradient</span> <span class="pre">dZ</span></code> and input <span class="math notranslate nohighlight">\(X\)</span> (padded). Just convolve them with stride=1 to get <span class="math notranslate nohighlight">\(dK\)</span></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sb</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">ph</span> <span class="o">=</span> <span class="n">Nh</span> <span class="o">-</span> <span class="n">Hd</span> <span class="o">-</span> <span class="n">Kh</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">pw</span> <span class="o">=</span> <span class="n">Nw</span> <span class="o">-</span> <span class="n">Wd</span> <span class="o">-</span> <span class="n">Kw</span> <span class="o">+</span> <span class="mi">1</span>
+
+<span class="n">dZ_Dp</span> <span class="o">=</span> <span class="n">pad_input2D_with_channels_batch_and_many_filters</span><span class="p">(</span><span class="n">dZ_D</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="p">(</span><span class="n">ph</span><span class="p">,</span> <span class="n">pw</span><span class="p">))</span>
+
+<span class="n">dK</span> <span class="o">=</span> <span class="n">conv2d_with_channels_batch_and_many_filters</span><span class="p">(</span><span class="n">Xp</span><span class="p">,</span> <span class="n">dZ_Dp</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">sb</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="s1">&#39;valid&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;param&#39;</span><span class="p">)</span>
+
+<span class="n">dK</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(2, 1, 5, 8)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">K</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(2, 1, 5, 8)
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Gradient db</strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dZ</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(2, 36, 47)
+</pre></div>
+</div>
+</div>
+</div>
+<blockquote>
+<div><p>Congrats! We have successfully calculated the gradients of the input, and the parameters for the convolution layer using only numpy (and no for loops)!</p>
+</div></blockquote>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./content/convolutional_neural_networks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="forward_propagation_convolution.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">3.2.2 Forward Propagation Convolution layer (Vectorized)</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="pooling_layers.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">3.2.4. Pooling layers</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Ujjwal Khandelwal<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

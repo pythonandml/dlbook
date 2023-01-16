@@ -1,0 +1,1120 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>4.2.3. FastText &#8212; Oddly Satisfying Deep Learning</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../../_static/logo.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="4.3. Contextual Word Embeddings" href="contextual_word_embeddings.html" />
+    <link rel="prev" title="4.2.2 GloVe" href="glove.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">Oddly Satisfying Deep Learning</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  1. Preliminaries
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/data_preprocessing.html">
+   1.1. Data Preprocessing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/performance_metrics.html">
+   1.2. Performance Metrics for ML and DL models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  2. Multilayer Perceptrons
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/activation.html">
+   2.1. Activation Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/perceptron.html">
+   2.2. Perceptron
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_1.html">
+   2.3. Terminologies Part-1
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/cost_functions.html">
+   2.4. Cost functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/forward_propagation.html">
+   2.5. Forward propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/backpropagation.html">
+   2.6. Back Propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/terminologies_part_2.html">
+   2.7. Terminologies Part-2
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/gradient_descent.html">
+   2.8. Gradient Descent
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/regularization.html">
+   2.9. Regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/dropout.html">
+   2.10. Dropout regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/batch_normalization.html">
+   2.11. Batch Normalization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/numerical_example_forward_backward_propagation.html">
+   2.12. Numerical example Forward and Back pass
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/shortcut_to_calculate_forward_back_propagation.html">
+   2.13. Shortcut to calculate forward pass and backpropagation across layers
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/neural_networks_mlp_scratch_best.html">
+   2.14. MLP model from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_pytorch.html">
+   2.15. 4 step process to build MLP model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../multilayer_perceptrons/mlp_keras.html">
+   2.16. MLP model using Tensorflow - Keras
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  3. Convolutional Neural Networks
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_over_mlp.html">
+   3.1. Convolutional Neural Networks over MLP
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_architecture.html">
+   3.2. Basic Architecture of CNN
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/convolutional_layers.html">
+     3.2.1. Convolutional layers
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/forward_propagation_convolution.html">
+     3.2.2 Forward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/backpropagation_convolution.html">
+     3.2.3 Backward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/pooling_layers.html">
+     3.2.4. Pooling layers
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_from_scratch.html">
+   3.3. Convolutional Neural Networks from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_pytorch.html">
+   3.4. 4 step process to build a CNN model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_keras.html">
+   3.5. CNN model using Tensorflow - Keras
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_state_of_the_art.html">
+   3.6. State of the art CNN models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  4. Word Embeddings
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="traditional_word_embeddings.html">
+   4.1. Traditional Word Embeddings
+  </a>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="static_word_embeddings.html">
+   4.2. Static Word Embeddings
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2">
+    <a class="reference internal" href="word2vec.html">
+     4.2.1. Word2Vec
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="glove.html">
+     4.2.2 GloVe
+    </a>
+   </li>
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     4.2.3. FastText
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="contextual_word_embeddings.html">
+   4.3. Contextual Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="elmo.html">
+     4.3.1. Embeddings from Language Models (ELMo)
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<div class="menu-dropdown menu-dropdown-launch-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Launch interactive content">
+      <i class="fas fa-rocket"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://mybinder.org/v2/gh/pythonandml/dlbook/master?urlpath=tree/content/word_embeddings/fasttext.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Binder"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_binder.svg">
+  </span>
+<span class="headerbtn__text-container">Binder</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://colab.research.google.com/github/pythonandml/dlbook/blob/master/content/word_embeddings/fasttext.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Colab"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_colab.png">
+  </span>
+<span class="headerbtn__text-container">Colab</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/pythonandml/dlbook"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/pythonandml/dlbook/issues/new?title=Issue%20on%20page%20%2Fcontent/word_embeddings/fasttext.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="../../_sources/content/word_embeddings/fasttext.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#fasttext-model-from-python-genism-library">
+   FastText model from python genism library
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#import-essential-libraries">
+     Import essential libraries
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#defining-values-for-parameters">
+     Defining values for parameters
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#explore-gensim-fasttext-model">
+     Explore Gensim fastText model
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#fasttext-models-from-official-cli-tool">
+   FastText models from Official CLI tool
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#building-fasttext-python-module">
+     Building fasttext python module
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#print-word-vectors-of-a-word">
+     Print word vectors of a word
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#finding-similar-words">
+     Finding similar words
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>4.2.3. FastText</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#fasttext-model-from-python-genism-library">
+   FastText model from python genism library
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#import-essential-libraries">
+     Import essential libraries
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#defining-values-for-parameters">
+     Defining values for parameters
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#explore-gensim-fasttext-model">
+     Explore Gensim fastText model
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#fasttext-models-from-official-cli-tool">
+   FastText models from Official CLI tool
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#building-fasttext-python-module">
+     Building fasttext python module
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#print-word-vectors-of-a-word">
+     Print word vectors of a word
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#finding-similar-words">
+     Finding similar words
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="fasttext">
+<h1>4.2.3. FastText<a class="headerlink" href="#fasttext" title="Permalink to this headline">#</a></h1>
+<p>A common problem in Natural Processing Language (NLP) tasks is to capture the context in which the word has been used. A single word with the same spelling and pronunciation (<code class="docutils literal notranslate"><span class="pre">homonyms</span></code>) can be used in multiple contexts and a potential solution to the above problem is making word embeddings.</p>
+<p><strong>FastText</strong> is a library created by the Facebook Research Team for efficient learning of word representations like <a class="reference external" href="https://pythonandml.github.io/dlbook/content/word_embeddings/word2vec.html">Word2Vec</a> (link to previous chapter) or <a class="reference external" href="https://pythonandml.github.io/dlbook/content/word_embeddings/glove.html">GloVe</a> (link to previous chapter) and sentence classification and is a type of <a class="reference external" href="https://pythonandml.github.io/dlbook/content/word_embeddings/static_word_embeddings.html">static word embedding</a> (link to previous chapter). If you want you can read the official <a class="reference external" href="https://arxiv.org/pdf/1607.04606.pdf">fastText paper</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">FastText</span></code> differs in the sense that <a class="reference external" href="https://pythonandml.github.io/dlbook/content/word_embeddings/word2vec.html">Word2Vec</a> (link to previous chapter) treats every <strong>single word</strong> as the <strong>smallest unit</strong> whose vector representation is to be found but <code class="docutils literal notranslate"><span class="pre">FastText</span></code> assumes a word to be formed by a <strong>n-grams of character</strong>.</p>
+<p>For example:</p>
+<p>word <code class="docutils literal notranslate"><span class="pre">sunny</span></code> is composed of <code class="docutils literal notranslate"><span class="pre">[sun,</span> <span class="pre">sunn,</span> <span class="pre">sunny],</span> <span class="pre">[sunny,</span> <span class="pre">unny,</span> <span class="pre">nny]</span></code>  etc, where <span class="math notranslate nohighlight">\(n\)</span> could range from 1 to the length of the word.</p>
+</div>
+<p><strong>Examples of different length character n-grams are given below:</strong></p>
+<p><img alt="" src="../../_images/fasttext_3_grams_list.png" /></p>
+<p><a class="reference external" href="https://amitness.com/2020/06/fasttext-embeddings/">Image Source</a></p>
+<table>
+<thead>
+<tr>
+<th>Word</th>
+<th>Length(n)</th>
+<th>Character n-grams</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>eating</td>
+<td>3</td>
+<td>&lt;ea, eat, ati, tin, ing, ng&gt;</td>
+</tr>
+<tr>
+<td>eating</td>
+<td>4</td>
+<td>&lt;eat, eati, atin, ting, ing&gt;</td>
+</tr>
+<tr>
+<td>eating</td>
+<td>5</td>
+<td>&lt;eati, eatin, ating, ting&gt;</td>
+</tr>
+<tr>
+<td>eating</td>
+<td>6</td>
+<td>&lt;eatin, eating, ating&gt;</td>
+</tr>
+</tbody>
+</table>
+<p>Thus <strong>FastText</strong> works well with rare words. So, even if a word wasn’t seen during training, it can be broken down into n-grams to get its embeddings. <a class="reference external" href="https://pythonandml.github.io/dlbook/content/word_embeddings/word2vec.html">Word2Vec</a> (link to previous chapter) and <a class="reference external" href="https://pythonandml.github.io/dlbook/content/word_embeddings/glove.html">GloVe</a> (link to previous chapter) both fail to provide any vector representation for words that are not in the model dictionary. This is a huge advantage of this method.</p>
+<section id="fasttext-model-from-python-genism-library">
+<h2>FastText model from python genism library<a class="headerlink" href="#fasttext-model-from-python-genism-library" title="Permalink to this headline">#</a></h2>
+<p>To train your own embeddings, you can either use the <a class="reference external" href="https://fasttext.cc/docs/en/unsupervised-tutorial.html">official CLI tool</a> or use the fasttext implementation available in gensim.</p>
+<p>You can install and import gensim library and then use gensim library to extract most similar words from the model that you downloaded from FastText.</p>
+<p>Assume we use the same corpus as we have used in the <a class="reference external" href="https://pythonandml.github.io/dlbook/content/word_embeddings/glove.html">GloVe</a> (link to previous chapter) model</p>
+<section id="import-essential-libraries">
+<h3>Import essential libraries<a class="headerlink" href="#import-essential-libraries" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gensim.models.fasttext</span> <span class="kn">import</span> <span class="n">FastText</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">documents</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;this is the first document&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;this document is the second document&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;this is the third one&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;is this the first document&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Tokenize</strong></p>
+<p>We will first tokenize the above documents list (extract words from the sentences).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">word_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">document</span> <span class="ow">in</span> <span class="n">documents</span><span class="p">:</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">document</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">):</span>
+        <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+    <span class="n">word_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
+
+<span class="n">word_tokens</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[&#39;this&#39;, &#39;is&#39;, &#39;the&#39;, &#39;first&#39;, &#39;document&#39;],
+ [&#39;this&#39;, &#39;document&#39;, &#39;is&#39;, &#39;the&#39;, &#39;second&#39;, &#39;document&#39;],
+ [&#39;this&#39;, &#39;is&#39;, &#39;the&#39;, &#39;third&#39;, &#39;one&#39;],
+ [&#39;is&#39;, &#39;this&#39;, &#39;the&#39;, &#39;first&#39;, &#39;document&#39;]]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="defining-values-for-parameters">
+<h3>Defining values for parameters<a class="headerlink" href="#defining-values-for-parameters" title="Permalink to this headline">#</a></h3>
+<p>The hyperparameters used in this model are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">size</span></code>: Dimensionality of the word vectors. window=window_size,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min_count</span></code>: The model ignores all words with total frequency lower than this.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sample</span></code>: The threshold for configuring which higher-frequency words are randomly down sampled, useful range is (0, 1e-5).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">workers</span></code>: Use these many worker threads to train the model (=faster training with multicore machines).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sg</span></code>: Training algorithm: skip-gram if sg=1, otherwise CBOW.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">iter</span></code>: Number of iterations (epochs) over the corpus.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">embedding_size</span> <span class="o">=</span> <span class="mi">300</span>
+<span class="n">window_size</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">min_word</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">down_sampling</span> <span class="o">=</span> <span class="mf">1e-2</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s train Gensim fastText word embeddings model with our own custom data:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fast_Text_model</span> <span class="o">=</span> <span class="n">FastText</span><span class="p">(</span><span class="n">word_tokens</span><span class="p">,</span>
+                      <span class="n">size</span><span class="o">=</span><span class="n">embedding_size</span><span class="p">,</span>
+                      <span class="n">window</span><span class="o">=</span><span class="n">window_size</span><span class="p">,</span>
+                      <span class="n">min_count</span><span class="o">=</span><span class="n">min_word</span><span class="p">,</span>
+                      <span class="n">sample</span><span class="o">=</span><span class="n">down_sampling</span><span class="p">,</span>
+                      <span class="n">workers</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+                      <span class="n">sg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                      <span class="nb">iter</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="explore-gensim-fasttext-model">
+<h3>Explore Gensim fastText model<a class="headerlink" href="#explore-gensim-fasttext-model" title="Permalink to this headline">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check word embedding for a perticular word</span>
+
+<span class="n">fast_Text_model</span><span class="o">.</span><span class="n">wv</span><span class="p">[</span><span class="s1">&#39;document&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(300,)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check top 5 similar word for a given word by gensim fastText</span>
+
+<span class="n">fast_Text_model</span><span class="o">.</span><span class="n">wv</span><span class="o">.</span><span class="n">most_similar</span><span class="p">(</span><span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="n">topn</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(&#39;document&#39;, 0.9611383676528931),
+ (&#39;this&#39;, 0.9607083797454834),
+ (&#39;the&#39;, 0.9569987058639526),
+ (&#39;third&#39;, 0.956832766532898),
+ (&#39;is&#39;, 0.9551167488098145)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check similarity score between two word</span>
+
+<span class="n">fast_Text_model</span><span class="o">.</span><span class="n">wv</span><span class="o">.</span><span class="n">similarity</span><span class="p">(</span><span class="s1">&#39;second&#39;</span><span class="p">,</span> <span class="s1">&#39;first&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.9406048
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="fasttext-models-from-official-cli-tool">
+<h2>FastText models from Official CLI tool<a class="headerlink" href="#fasttext-models-from-official-cli-tool" title="Permalink to this headline">#</a></h2>
+<section id="building-fasttext-python-module">
+<h3>Building fasttext python module<a class="headerlink" href="#building-fasttext-python-module" title="Permalink to this headline">#</a></h3>
+<p>In order to build fasttext module for python, use the following:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>git clone https://github.com/facebookresearch/fastText.git
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cloning into &#39;fastText&#39;...
+remote: Enumerating objects: 3930, done.
+remote: Counting objects: 100% (944/944), done.
+remote: Compressing objects: 100% (140/140), done.
+remote: Total 3930 (delta 854), reused 804 (delta 804), pack-reused 2986
+Receiving objects: 100% (3930/3930), 8.24 MiB | 2.34 MiB/s, done.
+Resolving deltas: 100% (2505/2505), done.
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">cd</span> fastText
+<span class="o">!</span>make
+<span class="o">!</span>cp fasttext ../
+<span class="o">%</span><span class="k">cd</span> ..
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>./fasttext
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>usage: fasttext &lt;command&gt; &lt;args&gt;
+
+The commands supported by fasttext are:
+
+  supervised              train a supervised classifier
+  quantize                quantize a model to reduce the memory usage
+  test                    evaluate a supervised classifier
+  test-label              print labels with precision and recall scores
+  predict                 predict most likely labels
+  predict-prob            predict most likely labels with probabilities
+  skipgram                train a skipgram model
+  cbow                    train a cbow model
+  print-word-vectors      print word vectors given a trained model
+  print-sentence-vectors  print sentence vectors given a trained model
+  print-ngrams            print ngrams given a trained model and word
+  nn                      query for nearest neighbors
+  analogies               query for analogies
+  dump                    dump arguments,dictionary,input/output vectors
+</pre></div>
+</div>
+</div>
+</div>
+<p>If everything was installed correctly then, you should see the list of available commands for FastText as the output.</p>
+<p>If you want to learn word representations using <strong>Skipgram</strong> and <strong>CBOW models</strong> from FastText model, we will see how we can implement both these methods to learn vector representations for a sample text file <a class="reference external" href="https://github.com/pythonandml/dlbook/blob/main/content/word_embeddings/datasets/file.txt">file.txt</a> using fasttext.</p>
+<p><strong>Skipgram</strong></p>
+<blockquote>
+<div><p>./fasttext skipgram -input file.txt -output model</p>
+</div></blockquote>
+<p><strong>CBOW</strong></p>
+<blockquote>
+<div><p>./fasttext cbow -input file.txt -output model</p>
+</div></blockquote>
+<p>Let us see the parameters defined above in steps for easy understanding.</p>
+<p><code class="docutils literal notranslate"><span class="pre">./fasttext</span></code> – It is used to invoke the FastText library.</p>
+<p><code class="docutils literal notranslate"><span class="pre">skipgram/cbow</span></code> – It is where you specify whether skipgram or cbow is to be used to create the word representations.</p>
+<p><code class="docutils literal notranslate"><span class="pre">-input</span></code> – This is the name of the parameter which specifies the following word to be used as the name of the file used for training. This argument should be used as is.</p>
+<p><code class="docutils literal notranslate"><span class="pre">data.txt</span></code> – a sample text file over which we wish to train the skipgram or cbow model. Change this name to the name of the text file you have.</p>
+<p><code class="docutils literal notranslate"><span class="pre">-output</span></code> – This is the name of the parameter which specifies the following word to be used as the name of the model being created. This argument is to be used as is.</p>
+<p><code class="docutils literal notranslate"><span class="pre">model</span></code> – This is the name of the model created.</p>
+<p>Running the above command will create two files named <code class="docutils literal notranslate"><span class="pre">model.bin</span></code> and <code class="docutils literal notranslate"><span class="pre">model.vec</span></code>.</p>
+<p><strong>model.bin</strong> contains the model parameters, dictionary and the hyperparameters and can be used to compute word vectors.</p>
+<p><strong>model.vec</strong> is a text file that contains the word vectors for one word per line.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>./fasttext skipgram -input file.txt -output model
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Read 0M words
+Number of words:  39
+Number of labels: 0
+Progress: 100.0% words/sec/thread:    5233 lr:  0.000000 avg.loss:  4.118974 ETA:   0h 0m 0s
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="print-word-vectors-of-a-word">
+<h3>Print word vectors of a word<a class="headerlink" href="#print-word-vectors-of-a-word" title="Permalink to this headline">#</a></h3>
+<p>In order to get the word vectors for a word or set of words, save them in a text file. For example, here is a sample text file named <a class="reference external" href="https://github.com/pythonandml/dlbook/blob/main/content/word_embeddings/datasets/queries.txt">queries.txt</a> that contains some random words.</p>
+<blockquote>
+<div><p>This is a sample document whose word vectors I want to calculate per line.</p>
+</div></blockquote>
+<p>We will get the vector representation of these words using the model we trained above.</p>
+<div class="cell tag_hide-output docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>./fasttext print-word-vectors model.bin &lt; queries.txt
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>This 0.001488 -0.00088977 0.001269 -0.0026087 -0.0030958 0.0006547 0.00033601 -0.0025968 0.000359 0.00016549 -0.0057352 -0.00076519 -0.0029626 -0.0015348 -0.0021845 -0.00076492 -0.0018045 -0.0022352 -0.0020006 -7.1538e-05 0.002477 0.00073409 0.00051157 0.001207 -0.00080267 -0.0021785 -0.0020973 0.0010278 -0.0014228 6.9732e-05 -0.003072 -0.00084118 0.0032873 0.00042565 0.0031798 -0.00062606 0.0024818 -0.001486 0.0021485 -0.0011063 0.00080187 -0.00066582 -0.0023849 0.001545 0.001557 -0.0035687 -0.0018026 -0.00066306 -0.0023016 0.00095573 -0.00026604 0.0051665 -0.00076879 -0.00067671 8.395e-05 0.00076354 -0.0011667 0.0014229 -3.6249e-06 0.0022986 -0.0022901 -0.00097346 -0.0013723 0.003118 0.0011788 -0.0015126 0.0011676 -0.0016475 -5.6458e-05 -0.0019892 -0.00063471 3.005e-05 0.00016219 0.00065521 -0.0020108 -0.0019475 -0.0012301 -0.0041074 0.00050122 0.0010706 -0.0025458 -0.0028248 0.0022962 0.00011252 -0.0022692 0.0010398 -0.00054782 -0.0036951 0.0012078 -0.0026392 0.0013318 0.0013911 0.0015233 -0.00072147 0.00041331 0.0034909 -0.0010348 -0.0013445 0.0012671 -0.0039564 
+is -0.00034395 -0.00068172 0.0005178 -0.0039969 0.001161 0.0052778 -0.0018388 -0.0015697 -0.0029946 0.0078364 -0.0113 -0.0090959 -0.0082908 0.0073874 -0.0032799 -0.0057479 -0.00014991 -0.0090465 -0.0025947 0.0065214 0.0035399 -0.0017172 -0.00085296 0.0033601 0.0029879 -0.0021935 -0.0048713 0.0023079 -0.0019602 0.003222 0.00019449 0.00768 0.0067221 0.0035947 -0.0056701 0.0011554 -0.0031773 -0.0041927 0.002762 0.0013437 0.0020521 0.0044649 0.001337 0.00031246 0.0071243 0.004501 0.0021106 -0.00035479 0.00079042 0.0028475 -0.0080765 0.0052791 -0.00087091 0.0026085 0.0070426 0.006198 0.0072573 0.0056766 0.0054154 0.0013646 -0.0070467 -0.010378 -0.0036617 -0.00085537 -0.0055405 -0.0060637 -0.0030927 0.00089237 -0.0088047 -0.0042454 -0.0066891 0.00030086 0.0025642 -0.00097555 0.0017634 0.0056305 -0.0013208 -0.0046111 0.0068007 0.0013283 0.0047543 -0.0028278 0.0088458 0.00015017 0.0022047 0.005672 4.7439e-05 -0.0028364 0.00051605 0.0045002 -0.0020032 -0.00026304 0.0061436 0.0018321 -0.0086017 -0.0051776 0.0048265 -0.0017501 0.0016939 -0.0029416 
+a -0.007536 -0.0033417 0.006671 -0.0036396 0.0047477 0.0067786 0.001001 -0.0043997 -0.0015962 0.002856 -0.0043374 -0.010805 -0.012876 0.0021176 -0.0015044 -0.00043181 -0.00018722 -0.0079174 -0.0014432 0.0097117 0.0022685 0.00077376 -0.0063753 -0.0068127 0.0027777 -0.0052765 0.00058329 -0.00053068 0.0013125 0.0054809 0.0077725 -0.0056188 0.00075597 0.0073172 0.00219 0.0014424 -0.0084112 0.0016128 0.0053452 0.0058278 -0.00099257 0.0025123 0.0089334 0.0060132 0.0079836 -0.005437 0.0058304 0.005914 -0.0033125 -0.0043042 -0.0041355 0.0061064 -0.0024662 -0.0033332 0.0081721 0.013078 0.00078296 0.0032501 -0.00031019 0.0071442 -0.0065047 -0.0053063 -0.0070099 -0.0017714 0.0053842 0.0077044 4.475e-06 -0.007205 -0.0077153 -0.0036813 -0.0060586 0.0028912 -0.0047829 0.0079589 -0.00091207 -0.0055197 -0.0023714 -0.013011 -0.00025746 0.0013448 0.002025 0.0015042 0.009564 0.0010368 0.0048688 0.0045908 0.0033605 -0.0007605 -0.0061125 0.0080739 0.0034651 -6.6476e-05 0.010278 0.0029886 -0.0043691 -0.0022252 0.0044593 0.00056625 -0.001324 -0.0057231 
+sample -0.0020472 -0.0021758 -0.00095804 0.0013089 0.00044128 -0.0013092 0.00045922 -0.00027959 0.00095128 0.00098208 0.00054457 -0.0004102 9.5693e-05 -0.00018881 -0.00019206 -0.00048277 -0.00027909 -0.00087347 -0.00060726 0.0027312 0.00041715 -0.00055466 -0.00015016 0.0012413 0.0010677 0.00026167 -0.001287 0.0017092 0.0006143 0.002986 0.001803 0.00039222 -0.0031058 -0.0010559 0.0009487 -0.00037951 0.00039624 -0.0014611 -0.0011789 0.0025447 -0.0034501 -0.00083937 -0.0014158 -0.0014943 -0.0010374 0.00016753 0.0015836 -0.0035767 -0.00080795 0.0007377 1.2298e-05 -0.0008093 -0.00051904 -0.0013633 -0.00094831 0.0020779 0.0017121 -7.875e-05 -0.0010063 -0.0016939 -0.00058378 -0.00090853 0.0017456 -0.00058084 0.00041224 0.0011559 0.00035716 0.0019455 -0.0019638 -0.00057741 -0.001252 -0.0015709 0.00055168 -0.0010782 -6.6225e-05 0.00062554 -0.0012161 -0.00099494 -0.00012632 -0.0021712 0.0013095 0.0019369 0.001343 -0.00097303 -0.00059956 -0.0013214 0.0013155 0.0037593 -0.00032615 -0.0010647 -0.00083144 0.0012197 0.0040963 0.00029009 -0.00045508 -0.0013926 0.0013795 0.00013553 -0.00044288 -0.00018478 
+document -0.0013458 0.00062303 -2.7339e-05 -0.00050449 -0.00089717 -0.00041941 0.00092868 0.00010178 -0.0018903 -0.00010031 -0.00025522 -0.000724 -0.00047903 -4.2942e-05 0.00042339 0.00080789 -0.00059123 0.0025212 4.6215e-05 -0.00024811 -0.00090737 -0.00087192 -6.0761e-05 -0.00022917 -0.0007549 -0.00127 0.0004414 3.1887e-05 -0.00045878 0.00070458 0.00053327 -0.00013511 -0.00017541 -0.0017007 0.00043091 0.00044071 -0.00093502 0.00062547 0.00032206 -0.00077271 -0.00089607 0.0015481 -0.00067812 -0.0013038 0.0012111 -0.0012855 0.0022 0.0013225 0.0019964 0.0017331 -0.0012107 -0.0019817 -0.0019236 0.0009703 0.00034632 0.00031077 -0.0015679 8.0813e-05 0.0010938 0.0013631 0.001301 -0.00015786 0.0021586 -0.0014815 -0.00029658 -0.0016093 -0.0030113 0.001175 -0.0003283 0.0030365 0.00014828 0.0011079 0.0015434 -0.00010545 0.0014691 0.001048 -0.0037554 0.0004829 0.00037297 0.00087545 0.00093586 -0.0012058 0.0023496 -0.0012709 0.0012233 0.0011466 -0.00018515 -0.00027255 -0.00097286 -0.00024567 0.00056983 -0.00060727 -0.00062421 -0.0012363 0.0020734 -0.0014813 -0.0022831 0.0014176 0.0013715 0.0012069 
+whose 0.00054792 0.0011937 0.00082307 -0.0012252 -0.0019674 -0.00048269 -0.00011502 -0.00084725 0.00058354 -0.00031583 -0.00036977 0.0015932 -0.0014512 0.0031178 -0.0030227 -0.00039768 0.0017801 -0.0014032 -0.00031109 -0.0023261 -0.0017535 -0.00058054 -0.00035744 -0.00068048 0.0020812 0.00076576 0.0012711 0.00022354 0.00066946 0.0011967 0.0016708 0.0020297 0.0014838 0.0036645 0.0019152 -0.0016183 -0.00011487 9.6578e-05 0.0012124 1.1867e-05 -0.00030926 0.00066865 0.0019804 0.0024008 -9.5561e-05 -0.003154 0.00062645 0.00010283 -0.0023251 0.0012524 -0.0023072 -0.0015111 -0.0011826 0.00059616 0.0020478 0.00089836 -0.00069962 -0.00091894 0.0016312 -0.0016671 -0.0032553 -0.00066092 -0.0027574 0.00080042 -0.00037611 -8.9853e-05 -0.0021152 0.00060821 -0.0014958 0.00024954 0.0027417 0.0014716 0.0011761 -0.0017758 0.00027944 -0.0013902 0.002493 -0.00053222 -0.00074707 0.00034775 -0.00013981 0.0024604 2.4888e-05 -0.0027857 -1.2166e-05 -0.0035205 -0.0010678 0.00025378 -0.00027473 0.00074205 -0.0011249 -0.0042608 0.0010913 -0.0022093 -2.679e-05 -4.6396e-05 -0.0003773 -0.0004989 0.0015203 -0.00019139 
+word -0.00025409 0.00096744 0.0049497 -0.00032588 0.0016006 0.0024075 -0.0038169 0.00021031 -0.0016116 0.0022946 -0.0059559 -0.0072992 -0.0038031 0.0026737 0.00026646 -0.0010559 0.0021195 -0.0073557 -0.00035755 0.0013653 -0.00034896 -0.00020773 -0.0024795 0.0027182 0.0052009 -0.0042148 -0.00073169 -0.00045605 -0.0018099 -0.00032808 0.0017144 0.0022335 0.0037804 0.0069224 -0.0022954 -0.00083255 -0.00029555 -0.00019974 -6.4909e-05 0.00029662 0.0027022 0.0015674 0.00036462 0.0013067 0.0042851 -0.00037913 0.0046911 0.002086 -0.0019307 0.0038958 -0.0070587 0.0081234 0.00021799 -0.0070302 0.001991 0.0071041 0.0045719 0.0010437 0.0032133 0.0057495 -0.0034484 -0.0053813 -0.0056952 0.0021939 -0.0020668 -0.0011078 -0.0030795 0.00056493 -0.0071458 -0.00065485 -0.0020349 0.00079504 0.0030109 0.0022615 0.00083377 0.0028798 0.00045376 -0.0075627 0.001661 0.0010637 0.0041424 -0.0021542 0.0065332 0.00084069 0.005215 0.0038575 0.001616 -0.0031342 0.00034762 0.0019841 -0.0013023 0.00014848 0.004405 0.0036935 -0.003873 -0.0015855 0.0031074 0.0065938 0.005659 -0.0011 
+vectors 0.00038658 -0.0013928 0.0012357 -0.001333 0.0027021 0.00075997 -0.00029431 -0.00055513 0.00050157 0.0027357 -0.0014255 -0.00065942 -0.0028608 -0.0010808 -0.00057774 0.001321 -0.00038114 -0.0017663 0.0012116 -0.0008368 0.0010997 0.00041036 -0.00013547 0.00084149 0.00097704 -0.0022089 -0.0020432 -0.0010133 0.00065119 -0.00056057 0.0014953 0.00075659 0.00093491 0.00093159 0.00034989 0.0032788 0.0011721 -0.00052777 -0.0016364 0.0019071 -0.00045318 0.0010894 0.00093233 -0.0017998 0.0014471 0.00041076 0.00074158 0.0013234 -0.00070132 0.0023826 -0.001487 0.004234 0.0024558 -0.0027613 0.0006408 0.0027273 0.002664 0.00049837 -0.0001509 0.003124 -0.0021806 -0.0026001 -0.0031485 0.0017449 -0.0041272 0.0014192 -0.0015655 0.0018709 -0.0015352 -0.00022393 -2.7086e-06 0.0010539 0.0010047 0.00073501 0.00051803 0.00078652 0.0015703 -0.00024043 -0.00085577 0.00043202 0.0017413 0.00096305 0.0016469 0.001664 0.00058567 0.00042565 0.001391 0.0024314 0.00091656 0.0010048 0.0011332 -0.00024452 0.0037941 0.001968 -0.00035051 -0.0031342 0.0022835 0.00029879 6.1991e-05 -0.00066969 
+I -0.00069133 0.0045856 -0.0052137 -0.0023177 -0.0018119 9.3955e-05 0.0096154 0.0057933 -0.0094986 0.006519 -0.0054977 -0.0021454 -0.0093617 -0.0087202 0.0041238 0.0058757 0.004545 -0.0055093 -0.0080073 -0.0042962 0.0052063 -0.0097359 -0.0086314 -0.0080371 -0.0059624 0.0036559 0.0046883 0.0091285 0.0093088 0.0099808 0.0070521 -0.0058106 0.0055107 0.0092619 0.0055264 0.0068075 0.007431 -0.00029706 -0.004455 -0.0073541 0.00069016 -0.0053936 -0.0061346 0.0031512 0.0031726 -0.0042425 0.0081266 -0.0074047 0.0085983 -0.0037953 0.0079322 -0.0075901 -0.0012602 0.0053241 0.0016339 0.0077182 -0.0074958 0.0069677 0.0013554 -0.0054699 0.0057896 0.0088826 0.00041472 0.0086257 0.0046631 -0.0089661 -0.0096831 -0.0018568 -0.0074199 0.0095656 -0.00080539 0.0079891 -0.00058167 0.0060022 0.0037848 0.0058651 0.0045349 0.0087908 0.006659 -0.0021523 -0.0094067 0.0055443 -0.0027681 -0.0046346 -0.00050833 -0.0084895 -1.7593e-05 -0.0052127 0.0097603 0.0012461 0.0051855 -0.0011069 9.8834e-05 0.0017954 0.0024588 -0.0090585 0.0077648 -0.007619 0.0024584 -0.00047435 
+want -0.0015352 0.00016256 -0.0028239 0.00063282 -8.8667e-05 -0.00010717 0.0013169 -0.0012257 0.0010963 0.0013093 -0.00057441 8.2985e-05 0.00029413 -0.0020509 0.00102 -0.0021073 -0.00037762 0.00084459 0.00038936 -0.00015819 0.0002004 -0.0038262 -0.0039196 -0.00076845 -0.00092656 0.0015869 0.0009618 0.001754 0.0006039 -0.0014928 -0.0015815 -7.2162e-05 -0.0025819 -0.0027366 -0.0015341 0.0010957 -0.0025925 -0.0010633 0.00017177 -0.00024576 -0.0019017 0.00071331 0.00050824 0.00046287 0.00131 0.0010558 -0.00021922 -0.00020259 0.00037192 0.0014561 -0.0024608 0.0018743 0.0011599 -0.0029864 -0.0010661 0.00011373 0.0030627 -6.7094e-05 0.0017826 0.0013337 -0.0025121 -0.00034565 -0.00092475 0.0056177 0.001045 0.00097299 0.0019313 0.00058317 0.00043882 0.0027969 0.0010521 0.0035207 -0.0008657 -0.00043939 -0.00072605 0.00081071 -0.0026149 0.0033931 0.0020818 -0.0016731 0.0015545 0.00028585 0.0011186 -0.0001995 0.0025456 0.0021523 -0.0010664 0.00074764 8.5627e-05 -0.0034205 0.00073618 -0.00014205 0.0019909 0.0016167 -0.0011049 0.00063698 0.0020231 0.00023165 0.0011769 0.0020615 
+to 0.007122 -0.00029985 0.0057535 0.0029172 -0.00067441 0.0013915 0.0005022 0.0014197 -0.0078026 0.0053702 -0.0066957 -0.0066869 -0.0098466 -0.00081326 0.0015748 -0.0019174 0.00042285 -0.0073228 0.0044665 0.0009951 0.0033429 0.0014911 0.00202 -0.0024177 0.0078689 -0.0084238 -0.00088287 -0.0048135 -0.0032591 0.0015295 0.0025348 0.0049799 0.0017698 0.0058044 -0.0021309 -0.00051683 0.0026336 -0.0026703 -0.0039567 0.0037847 -0.00091894 -0.00029966 0.00032649 0.0016437 0.0016177 -0.0035739 0.0042636 -0.0017367 -0.0026105 0.0055838 -0.001577 0.0046556 0.0020875 0.0031809 0.0028073 0.0024014 0.0079727 0.0020709 0.0011352 0.0047821 -0.0067658 -0.0027251 0.0012298 0.0018113 0.0029021 1.9115e-05 -0.0050852 -0.0027257 -0.0074628 0.0019989 -0.0055872 0.0027469 0.0088333 0.001065 0.00058138 0.0022799 0.00076092 -0.0048514 -0.0034529 0.00040965 0.0086887 0.0029808 0.0036394 0.003611 0.0020902 0.0044138 -0.0073244 -0.0037221 -0.0017188 0.0064811 0.0023001 -0.0014243 -0.00047849 0.006391 0.0012807 -0.00075681 -0.00090281 0.002897 0.0012316 -0.0038855 
+calculate 0.0012807 -0.00092222 -0.0011373 -0.0015874 -8.6564e-05 -0.00052067 0.0010714 -0.00019034 -0.0015941 -0.00078515 0.00086345 3.3952e-05 -0.00030925 0.00028834 -0.0022305 0.00012073 0.0001183 -0.00038601 -0.0011041 0.00071255 0.001043 -3.0438e-05 0.00016294 0.00031668 -0.0024666 -0.00037638 0.00072903 0.0011406 0.00058192 -0.0012329 0.0013329 0.0011977 -0.0015067 -0.0013159 0.00055154 0.00012891 0.0012002 0.0011662 6.0148e-05 0.00082696 0.00046245 -0.0020422 0.00054771 -0.00050958 -0.00036926 -0.00099871 0.0026956 0.0012025 -0.0020746 0.0010728 0.00078789 -0.0005912 0.00048597 -0.00012998 0.00011524 -0.00025546 0.00012014 -0.00044704 -0.0012322 -0.0023495 -0.0017202 0.0003401 0.0016791 -0.00072122 -0.0019989 0.0023403 -0.0011091 -0.00016578 0.0011889 -0.00093435 0.00091012 -2.6378e-05 -0.00051096 0.0022431 -5.6858e-05 0.0011762 -0.00056541 -0.00030466 8.5571e-05 -0.0020847 -0.0016633 0.00042654 0.0001314 0.00013798 0.0017728 -0.0014817 -0.00025154 -0.0013873 -0.00092087 -0.00088543 -0.00020187 -0.00074395 -0.00071001 0.0008865 0.0017125 0.0013442 9.1167e-05 -0.00043753 -0.0003589 -0.00058691 
+per 0.0020125 0.0031588 1.6165e-05 -0.0022371 0.00079514 0.0039963 0.0015513 -0.001826 -0.00049991 0.0011018 0.00090644 -0.00025805 -0.0023922 8.4276e-05 0.00085062 -0.0031347 0.0036161 -0.0032876 0.0015387 0.00078364 0.0011683 0.0022824 -0.00083565 0.0006456 -3.763e-05 -0.0029101 -0.0035917 -0.0010386 -0.0023981 -0.0011891 -0.0018535 -0.0011518 7.2871e-05 0.0011865 -0.002448 0.00062543 -9.6565e-05 -0.0010506 -0.00035248 0.00047329 0.0028273 -0.0021433 0.0021444 0.0033911 -0.00067004 0.0010285 -0.00068195 0.0016046 -0.0011102 0.0037419 0.0027911 0.003384 0.0012376 0.0042704 0.0023201 0.0018988 0.0011863 -0.0003972 0.0019617 0.0012915 -0.00033072 -0.0018737 -0.0034707 -0.00022545 0.0024531 -0.0013631 0.0048807 -0.0041604 0.00075979 -0.00091406 -0.0068826 -0.0022233 0.0031563 -0.00050201 1.8862e-05 0.0043252 0.0017217 -0.0033725 0.0039865 -0.00059063 0.0037452 0.001736 -0.0010455 0.0014609 -0.0003429 -0.0037413 -0.0032628 0.0026907 2.0079e-05 0.008146 0.0025161 0.0027845 0.0013283 0.0017913 -0.0038692 0.00051596 0.00077725 0.00054482 -0.0015888 0.0022951 
+line. 0.00082667 -0.00088982 0.0005674 -0.00050513 0.00012597 0.001683 0.00072434 0.00013973 0.0016867 -0.0022416 0.0022105 -0.0013689 0.0011536 -0.00032161 -1.4093e-06 0.0013528 -0.0014399 -0.0016085 -0.00028322 0.0018294 -0.0017395 -0.00088709 -0.0012558 0.00045208 -0.0023427 -0.0010193 -0.00094348 -0.0020433 -0.00023716 -0.00040074 0.00037875 -0.00058756 -0.00067705 0.0024137 0.0019173 -0.0010755 7.2287e-05 -0.0005915 0.00070035 0.0013427 0.0014422 -0.0030832 -8.9042e-05 -0.00088406 -0.0031906 -0.0018927 -0.001643 -0.000275 -0.00053914 -0.0019232 -0.00096443 -0.0018362 -0.0012952 0.00034175 -0.0010545 -4.4908e-06 -0.0012048 -0.00019017 -0.00099304 0.00087836 -0.00067364 -0.00013751 0.002052 0.00021845 0.0033389 0.0038742 0.0016088 0.00069019 0.00013485 -0.001352 -0.0012885 -0.00047027 0.00023204 0.0014233 0.0024872 0.0017479 0.0018838 0.0015785 -0.0016267 -0.00065888 -0.001892 0.0023493 -0.002279 -0.0030519 -0.003323 -0.00080788 0.0031009 -0.0014649 -0.00062035 -0.0034477 -6.3963e-05 0.00066232 -9.9153e-05 -0.0010256 0.00020103 -0.0010335 0.00090953 -0.0014786 -0.00050349 0.0039311 
+</pre></div>
+</div>
+</div>
+</div>
+<p>To check word vectors for a single word without saving into a file, you can do:</p>
+<div class="cell tag_hide-output docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span><span class="nb">echo</span> <span class="s2">&quot;word&quot;</span> <span class="p">|</span> ./fasttext print-word-vectors model.bin
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>word -0.00025409 0.00096744 0.0049497 -0.00032588 0.0016006 0.0024075 -0.0038169 0.00021031 -0.0016116 0.0022946 -0.0059559 -0.0072992 -0.0038031 0.0026737 0.00026646 -0.0010559 0.0021195 -0.0073557 -0.00035755 0.0013653 -0.00034896 -0.00020773 -0.0024795 0.0027182 0.0052009 -0.0042148 -0.00073169 -0.00045605 -0.0018099 -0.00032808 0.0017144 0.0022335 0.0037804 0.0069224 -0.0022954 -0.00083255 -0.00029555 -0.00019974 -6.4909e-05 0.00029662 0.0027022 0.0015674 0.00036462 0.0013067 0.0042851 -0.00037913 0.0046911 0.002086 -0.0019307 0.0038958 -0.0070587 0.0081234 0.00021799 -0.0070302 0.001991 0.0071041 0.0045719 0.0010437 0.0032133 0.0057495 -0.0034484 -0.0053813 -0.0056952 0.0021939 -0.0020668 -0.0011078 -0.0030795 0.00056493 -0.0071458 -0.00065485 -0.0020349 0.00079504 0.0030109 0.0022615 0.00083377 0.0028798 0.00045376 -0.0075627 0.001661 0.0010637 0.0041424 -0.0021542 0.0065332 0.00084069 0.005215 0.0038575 0.001616 -0.0031342 0.00034762 0.0019841 -0.0013023 0.00014848 0.004405 0.0036935 -0.003873 -0.0015855 0.0031074 0.0065938 0.005659 -0.0011 
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="finding-similar-words">
+<h3>Finding similar words<a class="headerlink" href="#finding-similar-words" title="Permalink to this headline">#</a></h3>
+<p>You can also find the words most similar to a given word. This functionality is provided by the nn parameter. Let’s see how we can find the most similar words to “happy”.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>./fasttext nn model.bin
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Query word? happy
+with 0.133388
+skip-gram 0.0966653
+can 0.0563167
+to 0.0551814
+and 0.046508
+more 0.0456839
+Word2vec 0.0375318
+are 0.0350034
+for 0.0350024
+which 0.0321014
+Query word? wrd
+skip-gram 0.201936
+words 0.199973
+syntactic 0.164848
+similar 0.164541
+a 0.154628
+more 0.152884
+to 0.145891
+word 0.141979
+can 0.137356
+word2vec 0.128606
+Query word? ^C
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Explore further</strong></p>
+<p><a class="reference external" href="https://www.analyticsvidhya.com/blog/2017/07/word-representations-text-classification-using-fasttext-nlp-facebook/">Code Source for Official CLI tool section</a></p>
+<p><a class="reference external" href="https://thinkinfi.com/fasttext-word-embeddings-python-implementation/">Code Source for gensim part</a></p>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./content/word_embeddings"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="glove.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">4.2.2 GloVe</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="contextual_word_embeddings.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">4.3. Contextual Word Embeddings</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Ujjwal Khandelwal<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>
