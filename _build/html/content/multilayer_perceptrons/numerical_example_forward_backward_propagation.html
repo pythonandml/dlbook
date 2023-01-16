@@ -1,0 +1,1481 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>2.12. Numerical example Forward and Back pass &#8212; Oddly Satisfying Deep Learning</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../../_static/logo.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="2.13. Shortcut to calculate forward pass and backpropagation across layers" href="shortcut_to_calculate_forward_back_propagation.html" />
+    <link rel="prev" title="2.11. Batch Normalization" href="batch_normalization.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">Oddly Satisfying Deep Learning</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  1. Preliminaries
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/data_preprocessing.html">
+   1.1. Data Preprocessing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/performance_metrics.html">
+   1.2. Performance Metrics for ML and DL models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  2. Multilayer Perceptrons
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="activation.html">
+   2.1. Activation Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="perceptron.html">
+   2.2. Perceptron
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="terminologies_part_1.html">
+   2.3. Terminologies Part-1
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="cost_functions.html">
+   2.4. Cost functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="forward_propagation.html">
+   2.5. Forward propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="backpropagation.html">
+   2.6. Back Propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="terminologies_part_2.html">
+   2.7. Terminologies Part-2
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="gradient_descent.html">
+   2.8. Gradient Descent
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="regularization.html">
+   2.9. Regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dropout.html">
+   2.10. Dropout regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="batch_normalization.html">
+   2.11. Batch Normalization
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   2.12. Numerical example Forward and Back pass
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="shortcut_to_calculate_forward_back_propagation.html">
+   2.13. Shortcut to calculate forward pass and backpropagation across layers
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="neural_networks_mlp_scratch_best.html">
+   2.14. MLP model from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="mlp_pytorch.html">
+   2.15. 4 step process to build MLP model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="mlp_keras.html">
+   2.16. MLP model using Tensorflow - Keras
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  3. Convolutional Neural Networks
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_over_mlp.html">
+   3.1. Convolutional Neural Networks over MLP
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_architecture.html">
+   3.2. Basic Architecture of CNN
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/convolutional_layers.html">
+     3.2.1. Convolutional layers
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/forward_propagation_convolution.html">
+     3.2.2 Forward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/backpropagation_convolution.html">
+     3.2.3 Backward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/pooling_layers.html">
+     3.2.4. Pooling layers
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_from_scratch.html">
+   3.3. Convolutional Neural Networks from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_pytorch.html">
+   3.4. 4 step process to build a CNN model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_keras.html">
+   3.5. CNN model using Tensorflow - Keras
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_state_of_the_art.html">
+   3.6. State of the art CNN models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  4. Word Embeddings
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../word_embeddings/traditional_word_embeddings.html">
+   4.1. Traditional Word Embeddings
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/static_word_embeddings.html">
+   4.2. Static Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/word2vec.html">
+     4.2.1. Word2Vec
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/glove.html">
+     4.2.2 GloVe
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/fasttext.html">
+     4.2.3. FastText
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/contextual_word_embeddings.html">
+   4.3. Contextual Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/elmo.html">
+     4.3.1. Embeddings from Language Models (ELMo)
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<div class="menu-dropdown menu-dropdown-launch-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Launch interactive content">
+      <i class="fas fa-rocket"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://mybinder.org/v2/gh/pythonandml/dlbook/master?urlpath=tree/content/multilayer_perceptrons/numerical_example_forward_backward_propagation.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Binder"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_binder.svg">
+  </span>
+<span class="headerbtn__text-container">Binder</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://colab.research.google.com/github/pythonandml/dlbook/blob/master/content/multilayer_perceptrons/numerical_example_forward_backward_propagation.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Colab"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_colab.png">
+  </span>
+<span class="headerbtn__text-container">Colab</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/pythonandml/dlbook"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/pythonandml/dlbook/issues/new?title=Issue%20on%20page%20%2Fcontent/multilayer_perceptrons/numerical_example_forward_backward_propagation.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="../../_sources/content/multilayer_perceptrons/numerical_example_forward_backward_propagation.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>2.12. Numerical example Forward and Back pass</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="numerical-example-forward-and-back-pass">
+<h1>2.12. Numerical example Forward and Back pass<a class="headerlink" href="#numerical-example-forward-and-back-pass" title="Permalink to this headline">#</a></h1>
+<p>Here we present <strong>Numerical example (with code) - Forward pass and Backpropagation (step by step vectorized form)</strong></p>
+<p><strong>Note:</strong></p>
+<ul class="simple">
+<li><p>The equations (in vectorized form) for forward propagation can be found <a class="reference external" href="https://pythonandml.github.io/dlbook/content/multilayer_perceptrons/forward_propagation.html">here</a> (link to previous chapter)</p></li>
+<li><p>The equations (in vectorized form) for back propagation can be found <a class="reference external" href="https://pythonandml.github.io/dlbook/content/multilayer_perceptrons/backpropagation.html">here</a> (link to previous chapter)</p></li>
+</ul>
+<p>Consider the network shown</p>
+<p><img alt="" src="../../_images/neural_nets_architecture_2.png" /></p>
+<p><strong>Given values</strong></p>
+<p>Input <span class="math notranslate nohighlight">\(x = [1, 4, 5]\)</span>, <span class="math notranslate nohighlight">\(y = [0.1, 0.05]\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+W_1 = \begin{bmatrix}
+0.1 &amp; 0.2\\ 
+0.3 &amp; 0.4\\ 
+0.5 &amp; 0.6
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+b_1 = \begin{bmatrix}
+0.5\\ 
+0.5
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+W_2 = \begin{bmatrix}
+0.7 &amp; 0.8\\ 
+0.9 &amp; 0.1
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+b_2 = \begin{bmatrix}
+0.5\\ 
+0.5
+\end{bmatrix}
+\end{split}\]</div>
+<p>The <a class="reference external" href="https://pythonandml.github.io/dlbook/content/multilayer_perceptrons/activation.html">activation functions</a> <span class="math notranslate nohighlight">\(f_1(z)\)</span> and <span class="math notranslate nohighlight">\(f_2(z)\)</span> (link to previous chapter) used here is <strong>sigmoid</strong> (for both the layers) and the <a class="reference external" href="https://pythonandml.github.io/dlbook/content/multilayer_perceptrons/cost_functions.html">cost function</a> <span class="math notranslate nohighlight">\(J(W, b)\)</span> (link to previous chapter) is <strong>MSE</strong>.</p>
+<blockquote>
+<div><p><strong>Note:</strong> <span class="math notranslate nohighlight">\(\odot\)</span> means element wise multiplication (also called <strong>Hadamard product</strong>)</p>
+</div></blockquote>
+<p>Let us write the code simultaneously</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    x: input matrix of shape (m, d) </span>
+<span class="sd">    where &#39;m&#39; is the number of samples (in case of batch gradient descent of size m)</span>
+<span class="sd">    and &#39;d&#39; is the number of features</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">d_sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="c1"># sigmoid derivative</span>
+    <span class="k">return</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">d_mse</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    dJ/daL</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">-</span> <span class="n">y</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]])</span>
+
+<span class="n">W1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">]])</span>
+<span class="n">b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.5</span><span class="p">]])</span>
+
+<span class="n">W2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]])</span>
+<span class="n">b2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.5</span><span class="p">]])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Forward and Backpropagation - Numerical example&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">x =&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">y =&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">W1 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">W1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">b1 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">b1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">W2 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">W2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">b2 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">b2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Forward and Backpropagation - Numerical example
+
+x = [[1 4 5]]
+
+y = [[0.1  0.05]]
+
+W1 =
+
+ [[0.1 0.2]
+ [0.3 0.4]
+ [0.5 0.6]]
+
+b1 =
+
+ [[0.5]
+ [0.5]]
+
+W2 =
+
+ [[0.7 0.8]
+ [0.9 0.1]]
+
+b2 =
+
+ [[0.5]
+ [0.5]]
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Fowrard Propagation</strong></p>
+<p>For input layer (<span class="math notranslate nohighlight">\(l=0\)</span>),</p>
+<div class="math notranslate nohighlight">
+\[z_0 = a_0 = x\]</div>
+<p>For hidden layer (<span class="math notranslate nohighlight">\(l=1\)</span>)</p>
+<div class="math notranslate nohighlight">
+\[
+z_1 = a_0 W_1 + b_1^T
+\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\therefore z_1 = \begin{bmatrix}
+1 &amp; 4 &amp; 5
+\end{bmatrix} \begin{bmatrix}
+0.1 &amp; 0.2\\ 
+0.3 &amp; 0.4\\ 
+0.5 &amp; 0.6
+\end{bmatrix} + \begin{bmatrix}
+0.5 &amp; 0.5
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[
+\therefore z_1 = \begin{bmatrix}
+3.8 &amp; 4.8
+\end{bmatrix} + \begin{bmatrix}
+0.5 &amp; 0.5
+\end{bmatrix}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+\therefore z_1 = \begin{bmatrix}
+4.3 &amp; 5.3
+\end{bmatrix}
+\]</div>
+<p>Now,</p>
+<div class="math notranslate nohighlight">
+\[a_1 = f_1(z_1) = f_1(\begin{bmatrix}
+4.3 &amp; 5.3
+\end{bmatrix})\]</div>
+<div class="math notranslate nohighlight">
+\[a_1 = \begin{bmatrix}
+0.9866 &amp; 0.9950
+\end{bmatrix}\]</div>
+<p>Let us code the same</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">z0</span> <span class="o">=</span> <span class="n">a0</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">z1</span> <span class="o">=</span> <span class="n">a0</span> <span class="o">@</span> <span class="n">W1</span> <span class="o">+</span> <span class="n">b1</span><span class="o">.</span><span class="n">T</span>
+<span class="n">a1</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;z1 =&quot;</span><span class="p">,</span> <span class="n">z1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">a1 =&quot;</span><span class="p">,</span> <span class="n">a1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>z1 = [[4.3 5.3]]
+
+a1 = [[0.98661308 0.9950332 ]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now for the output layer (<span class="math notranslate nohighlight">\(l=2\)</span>),</p>
+<div class="math notranslate nohighlight">
+\[
+z_2 = a_1 W_2 + b_2^T
+\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\therefore z_2 = \begin{bmatrix}
+0.9866 &amp; 0.9950
+\end{bmatrix} \begin{bmatrix}
+0.7 &amp; 0.8\\ 
+0.9 &amp; 0.1
+\end{bmatrix} + \begin{bmatrix}
+0.5 &amp; 0.5
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[
+\therefore z_2 = \begin{bmatrix}
+2.086 &amp; 1.389
+\end{bmatrix}
+\]</div>
+<p>Now,</p>
+<div class="math notranslate nohighlight">
+\[a_2 = f_2(z_2) = f_2(\begin{bmatrix}
+2.086 &amp; 1.389
+\end{bmatrix})\]</div>
+<div class="math notranslate nohighlight">
+\[a_2 = \begin{bmatrix}
+0.8896 &amp; 0.8004
+\end{bmatrix}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">z2</span> <span class="o">=</span> <span class="n">a1</span> <span class="o">@</span> <span class="n">W2</span> <span class="o">+</span> <span class="n">b2</span><span class="o">.</span><span class="n">T</span>
+<span class="n">a2</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;z2 =&quot;</span><span class="p">,</span> <span class="n">z2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">a2 =&quot;</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>z2 = [[2.08615904 1.38879379]]
+
+a2 = [[0.88955061 0.80039961]]
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Backpropagation</strong></p>
+<p>Output layer Backpropagation error (<span class="math notranslate nohighlight">\(\delta_2\)</span>)</p>
+<div class="math notranslate nohighlight">
+\[
+\frac{\partial J(W, b)}{\partial a_2} = a_2 - y = \begin{bmatrix}
+0.8896 &amp; 0.8004
+\end{bmatrix} - \begin{bmatrix}
+0.1 &amp; 0.05
+\end{bmatrix}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+\frac{\partial J(W, b)}{\partial a_2} = \begin{bmatrix}
+0.7896 &amp; 0.7504
+\end{bmatrix}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+f'_2(z_2) = f'_2(\begin{bmatrix}
+2.086 &amp; 1.389
+\end{bmatrix}) = \begin{bmatrix}
+0.0983 &amp; 0.1598
+\end{bmatrix}
+\]</div>
+<p>Therefore,</p>
+<div class="math notranslate nohighlight">
+\[
+\delta_2 = \frac{\partial J(W, b)}{\partial a_2} \odot f'_2(z_2)
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+\delta_2 = \begin{bmatrix}
+0.7896 &amp; 0.7504
+\end{bmatrix} \odot \begin{bmatrix}
+0.0983 &amp; 0.1598
+\end{bmatrix}
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+\delta_2 = \begin{bmatrix}
+0.0776 &amp; 0.1199
+\end{bmatrix}
+\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dJda2</span> <span class="o">=</span> <span class="n">d_mse</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">da2dz2</span> <span class="o">=</span> <span class="n">d_sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">)</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="n">dJda2</span> <span class="o">*</span> <span class="n">da2dz2</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;dJda2 =&quot;</span><span class="p">,</span><span class="n">dJda2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">f2&#39;(z2) =&quot;</span><span class="p">,</span><span class="n">da2dz2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">d2 =&quot;</span><span class="p">,</span><span class="n">d2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dJda2 = [[0.78955061 0.75039961]]
+
+f2&#39;(z2) = [[0.09825032 0.15976008]]
+
+d2 = [[0.0775736 0.1198839]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Hidden layer Backpropagation error (<span class="math notranslate nohighlight">\(\delta_1\)</span>)</p>
+<div class="math notranslate nohighlight">
+\[
+\delta_1 = (\delta_2 W_2^T) \odot f'_1(z_1)
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+f'_1(z_1) = f'_1(\begin{bmatrix}
+4.3 &amp; 5.3
+\end{bmatrix}) = \begin{bmatrix}
+0.0132 &amp; 0.0049
+\end{bmatrix}
+\]</div>
+<p>Therefore,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\delta_1 = \begin{bmatrix}
+0.0776 &amp; 0.1199
+\end{bmatrix} \begin{bmatrix}
+0.7 &amp; 0.9\\ 
+0.8 &amp; 0.1
+\end{bmatrix} \odot \begin{bmatrix}
+0.0132 &amp; 0.0049
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[
+\delta_1 = \begin{bmatrix}
+0.002 &amp; 0.0004
+\end{bmatrix}
+\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">da1dz1</span> <span class="o">=</span> <span class="n">d_sigmoid</span><span class="p">(</span><span class="n">z1</span><span class="p">)</span>
+<span class="n">d1</span> <span class="o">=</span> <span class="p">(</span><span class="n">d2</span> <span class="o">@</span> <span class="n">W2</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">da1dz1</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;f1&#39;(z1) =&quot;</span><span class="p">,</span><span class="n">da1dz1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">d1 =&quot;</span><span class="p">,</span><span class="n">d1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>f1&#39;(z1) = [[0.01320771 0.00494213]]
+
+d1 = [[0.00198391 0.00040429]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Rate of change of the cost with respect to weights <span class="math notranslate nohighlight">\(W_l\)</span></p>
+<p>For <span class="math notranslate nohighlight">\(l=1\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[
+\frac{\partial J(W, b)}{\partial W_1} = a_0^T \delta_1
+\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\frac{\partial J(W, b)}{\partial W_1} = \begin{bmatrix}
+1\\ 
+4\\ 
+5
+\end{bmatrix} \begin{bmatrix}
+0.002 &amp; 0.0004
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\frac{\partial J(W, b)}{\partial W_1} = \begin{bmatrix}
+0.002 &amp; 0.0004 \\ 
+0.0079 &amp; 0.0016\\ 
+0.0099 &amp; 0.002
+\end{bmatrix}
+\end{split}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dLdW1</span> <span class="o">=</span> <span class="n">a0</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">d1</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;dLdW1 =</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dLdW1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dLdW1 =
+
+ [[0.002  0.0004]
+ [0.0079 0.0016]
+ [0.0099 0.002 ]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>For <span class="math notranslate nohighlight">\(l=2\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[
+\frac{\partial J(W, b)}{\partial W_2} = a_1^T \delta_2
+\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\frac{\partial J(W, b)}{\partial W_2} = \begin{bmatrix}
+0.0765 &amp; 0.1183\\ 
+0.0772 &amp; 0.1193
+\end{bmatrix}
+\end{split}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dLdW2</span> <span class="o">=</span> <span class="n">a1</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">d2</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;dLdW2 =</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dLdW2</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dLdW2 =
+
+ [[0.0765 0.1183]
+ [0.0772 0.1193]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Rate of change of the cost with respect to bias <span class="math notranslate nohighlight">\(b_l\)</span></p>
+<p>Finally, the partial derivative of the cost function <span class="math notranslate nohighlight">\(J(W, b)\)</span> with respect to bias of that layer <span class="math notranslate nohighlight">\(b_l\)</span> will be:</p>
+<p>For <span class="math notranslate nohighlight">\(l=1\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\frac{\partial J(W, b)}{\partial b_1} = \sum \delta_1 = \begin{bmatrix}
+0.002\\ 
+0.0004
+\end{bmatrix}
+\end{split}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dLdb1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;dLdb1 =</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dLdb1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dLdb1 =
+
+ [[0.002 ]
+ [0.0004]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>For <span class="math notranslate nohighlight">\(l=2\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\frac{\partial J(W, b)}{\partial b_2} = \sum \delta_2 = \begin{bmatrix}
+0.0775\\ 
+0.1199
+\end{bmatrix}
+\end{split}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dLdb2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;dLdb2 =</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dLdb2</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dLdb2 =
+
+ [[0.0776]
+ [0.1199]]
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Update the parameters</strong></p>
+<blockquote>
+<div><p><strong>Note:</strong> Although this has not been introduced yet in our chapters, but just for the sake of completenss, we will show how to update the weights and biases using the partial derivatives obtained. So, if you are not aware of this step then you can skip it for now.</p>
+</div></blockquote>
+<p>Let the learning rate <span class="math notranslate nohighlight">\(\eta = 0.01\)</span>.</p>
+<p><strong>Updating <span class="math notranslate nohighlight">\(W_1\)</span></strong></p>
+<div class="math notranslate nohighlight">
+\[
+W_1 := W_1 - \frac{\eta}{m} \frac{\partial J(W, b)}{\partial W_1}
+\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\therefore W_1 = \begin{bmatrix}
+0.1 &amp; 0.2\\ 
+0.3 &amp; 0.4\\ 
+0.5 &amp; 0.6
+\end{bmatrix} - 0.01 \begin{bmatrix}
+0.002 &amp; 0.0004 \\ 
+0.0079 &amp; 0.0016\\ 
+0.0099 &amp; 0.002
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\therefore W_1 = \begin{bmatrix}
+0.09998 &amp; 0.1999\\ 
+0.29992 &amp; 0.39998\\ 
+0.4999 &amp; 0.59998
+\end{bmatrix}
+\end{split}\]</div>
+<p><strong>Updating <span class="math notranslate nohighlight">\(W_2\)</span></strong></p>
+<div class="math notranslate nohighlight">
+\[
+W_2 := W_2 - \frac{\eta}{m} \frac{\partial J(W, b)}{\partial W_2}
+\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\therefore W_2 = \begin{bmatrix}
+0.7 &amp; 0.8\\ 
+0.9 &amp; 0.1
+\end{bmatrix} - 0.01 \begin{bmatrix}
+0.0765 &amp; 0.1183\\ 
+0.0772 &amp; 0.1193
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\therefore W_2 = \begin{bmatrix}
+0.6992 &amp; 0.7988\\ 
+0.89923 &amp;  0.0988
+\end{bmatrix}
+\end{split}\]</div>
+<p><strong>Updating <span class="math notranslate nohighlight">\(b_1\)</span></strong></p>
+<div class="math notranslate nohighlight">
+\[
+b_1 := b_1 - \frac{\eta}{m} \frac{\partial J(W, b)}{\partial b_1}
+\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\therefore b_1 = \begin{bmatrix}
+0.5\\ 
+0.5
+\end{bmatrix} - 0.01 \begin{bmatrix}
+0.002\\ 
+0.0004
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\therefore b_1 = \begin{bmatrix}
+0.49998\\ 
+0.499995
+\end{bmatrix}
+\end{split}\]</div>
+<p><strong>Updating <span class="math notranslate nohighlight">\(b_2\)</span></strong></p>
+<div class="math notranslate nohighlight">
+\[
+b_2 := b_2 - \frac{\eta}{m} \frac{\partial J(W, b)}{\partial b_2}
+\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\therefore b_2 = \begin{bmatrix}
+0.5\\ 
+0.5
+\end{bmatrix} - 0.01 \begin{bmatrix}
+0.0775\\ 
+0.1199
+\end{bmatrix}
+\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\therefore b_2 = \begin{bmatrix}
+0.49922\\ 
+0.49880
+\end{bmatrix}
+\end{split}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">W1n</span> <span class="o">=</span> <span class="n">W1</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="n">dLdW1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updated Weight W1 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">W1n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Updated Weight W1 =
+
+ [[0.09998016 0.19999596]
+ [0.29992064 0.39998383]
+ [0.4999008  0.59997979]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">W2n</span> <span class="o">=</span> <span class="n">W2</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="n">dLdW2</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updated Weight W2 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">W2n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Updated Weight W2 =
+
+ [[0.69923465 0.79881721]
+ [0.89922812 0.09880712]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">b1n</span> <span class="o">=</span> <span class="n">b1</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="n">dLdb1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updated bias b1 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">b1n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Updated bias b1 =
+
+ [[0.49998016]
+ [0.49999596]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">b2n</span> <span class="o">=</span> <span class="n">b2</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="n">dLdb2</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updated bias b2 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">b2n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Updated bias b2 =
+
+ [[0.49922426]
+ [0.49880116]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>The solution (in non-vectorized format) for the given network can be found <a class="reference external" href="https://www.anotsorandomwalk.com/backpropagation-example-with-numbers-step-by-step/">here</a> (link to an external website). On comparing we find our solution is in complete agreement with that solution! We can easily extend this vectorized format for multiple hidden layers as well as for a batch dataset. You can also repeat this update for many epochs. Complete code is shown below</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># Utility functions for activation, cost and their derivatives</span>
+
+<span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    x: input matrix of shape (m, d) </span>
+<span class="sd">    where &#39;m&#39; is the number of samples (in case of batch gradient descent of size m)</span>
+<span class="sd">    and &#39;d&#39; is the number of features</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">d_sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="c1"># sigmoid derivative</span>
+    <span class="k">return</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">d_mse</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    dJ/daL</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">-</span> <span class="n">y</span>
+
+<span class="c1"># Given Parameters</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]])</span>
+
+<span class="n">W1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">]])</span>
+<span class="n">b1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.5</span><span class="p">]])</span>
+
+<span class="n">W2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]])</span>
+<span class="n">b2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">],</span>
+               <span class="p">[</span><span class="mf">0.5</span><span class="p">]])</span>
+
+<span class="c1"># Forward Propagation</span>
+
+<span class="n">z0</span> <span class="o">=</span> <span class="n">a0</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">z1</span> <span class="o">=</span> <span class="n">a0</span> <span class="o">@</span> <span class="n">W1</span> <span class="o">+</span> <span class="n">b1</span><span class="o">.</span><span class="n">T</span>
+<span class="n">a1</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z1</span><span class="p">)</span>
+
+<span class="n">z2</span> <span class="o">=</span> <span class="n">a1</span> <span class="o">@</span> <span class="n">W2</span> <span class="o">+</span> <span class="n">b2</span><span class="o">.</span><span class="n">T</span>
+<span class="n">a2</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">)</span>
+
+<span class="c1"># Backward Propagation</span>
+
+<span class="c1"># 1. Output error</span>
+
+<span class="n">dJda2</span> <span class="o">=</span> <span class="n">d_mse</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">da2dz2</span> <span class="o">=</span> <span class="n">d_sigmoid</span><span class="p">(</span><span class="n">z2</span><span class="p">)</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="n">dJda2</span> <span class="o">*</span> <span class="n">da2dz2</span>
+
+<span class="c1"># 2. Hidden layer error</span>
+
+<span class="n">da1dz1</span> <span class="o">=</span> <span class="n">d_sigmoid</span><span class="p">(</span><span class="n">z1</span><span class="p">)</span>
+<span class="n">d1</span> <span class="o">=</span> <span class="p">(</span><span class="n">d2</span> <span class="o">@</span> <span class="n">W2</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">da1dz1</span>
+
+<span class="c1"># 3. dJ/dW</span>
+
+<span class="n">dLdW1</span> <span class="o">=</span> <span class="n">a0</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">d1</span>
+<span class="n">dLdW2</span> <span class="o">=</span> <span class="n">a1</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">d2</span>
+
+<span class="c1"># 4. dJ/db</span>
+
+<span class="n">dLdb1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">dLdb2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Update parameters</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="c1"># Learning rate</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">W1n</span> <span class="o">=</span> <span class="n">W1</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="n">dLdW1</span>
+<span class="n">W2n</span> <span class="o">=</span> <span class="n">W2</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="n">dLdW2</span>
+<span class="n">b1n</span> <span class="o">=</span> <span class="n">b1</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="n">dLdb1</span>
+<span class="n">b2n</span> <span class="o">=</span> <span class="n">b2</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="n">dLdb2</span>
+
+<span class="c1"># Prints</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Forward and Backpropagation - Numerical example&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">x =&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">y =&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">W1 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">W1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">b1 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">b1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">W2 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">W2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">b2 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">b2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">z1 =&quot;</span><span class="p">,</span> <span class="n">z1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">a1 =&quot;</span><span class="p">,</span> <span class="n">a1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">z2 =&quot;</span><span class="p">,</span> <span class="n">z2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">a2 =&quot;</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">dJda2 =&quot;</span><span class="p">,</span><span class="n">dJda2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">f2&#39;(z2) =&quot;</span><span class="p">,</span><span class="n">da2dz2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">d2 =&quot;</span><span class="p">,</span><span class="n">d2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">f1&#39;(z1) =&quot;</span><span class="p">,</span><span class="n">da1dz1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">d1 =&quot;</span><span class="p">,</span><span class="n">d1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">dLdW1 =</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dLdW1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">dLdW2 =</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dLdW2</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">dLdb1 =</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dLdb1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">dLdb2 =</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">dLdb2</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Updated Weight W1 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">W1n</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Updated Weight W2 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">W2n</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Updated bias b1 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">b1n</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Updated bias b2 =</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">b2n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Forward and Backpropagation - Numerical example
+
+x = [[1 4 5]]
+
+y = [[0.1  0.05]]
+
+W1 =
+
+ [[0.1 0.2]
+ [0.3 0.4]
+ [0.5 0.6]]
+
+b1 =
+
+ [[0.5]
+ [0.5]]
+
+W2 =
+
+ [[0.7 0.8]
+ [0.9 0.1]]
+
+b2 =
+
+ [[0.5]
+ [0.5]]
+
+z1 = [[4.3 5.3]]
+
+a1 = [[0.98661308 0.9950332 ]]
+
+z2 = [[2.08615904 1.38879379]]
+
+a2 = [[0.88955061 0.80039961]]
+
+dJda2 = [[0.78955061 0.75039961]]
+
+f2&#39;(z2) = [[0.09825032 0.15976008]]
+
+d2 = [[0.0775736 0.1198839]]
+
+f1&#39;(z1) = [[0.01320771 0.00494213]]
+
+d1 = [[0.00198391 0.00040429]]
+
+dLdW1 =
+
+ [[0.002  0.0004]
+ [0.0079 0.0016]
+ [0.0099 0.002 ]]
+
+dLdW2 =
+
+ [[0.0765 0.1183]
+ [0.0772 0.1193]]
+
+dLdb1 =
+
+ [[0.002 ]
+ [0.0004]]
+
+dLdb2 =
+
+ [[0.0776]
+ [0.1199]]
+
+Updated Weight W1 =
+
+ [[0.09998016 0.19999596]
+ [0.29992064 0.39998383]
+ [0.4999008  0.59997979]]
+
+Updated Weight W2 =
+
+ [[0.69923465 0.79881721]
+ [0.89922812 0.09880712]]
+
+Updated bias b1 =
+
+ [[0.49998016]
+ [0.49999596]]
+
+Updated bias b2 =
+
+ [[0.49922426]
+ [0.49880116]]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./content/multilayer_perceptrons"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="batch_normalization.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">2.11. Batch Normalization</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="shortcut_to_calculate_forward_back_propagation.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">2.13. Shortcut to calculate forward pass and backpropagation across layers</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Ujjwal Khandelwal<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

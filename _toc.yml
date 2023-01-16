@@ -1,0 +1,52 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: content/intro
+parts:
+  - caption: 1. Preliminaries
+    chapters:
+    - file: content/preliminaries/data_preprocessing
+    - file: content/preliminaries/performance_metrics
+  - caption: 2. Multilayer Perceptrons
+    chapters:
+    - file: content/multilayer_perceptrons/activation
+    - file: content/multilayer_perceptrons/perceptron
+    - file: content/multilayer_perceptrons/terminologies_part_1
+    - file: content/multilayer_perceptrons/cost_functions
+    - file: content/multilayer_perceptrons/forward_propagation
+    - file: content/multilayer_perceptrons/backpropagation
+    - file: content/multilayer_perceptrons/terminologies_part_2
+    - file: content/multilayer_perceptrons/gradient_descent
+    - file: content/multilayer_perceptrons/regularization
+    - file: content/multilayer_perceptrons/dropout
+    - file: content/multilayer_perceptrons/batch_normalization
+    - file: content/multilayer_perceptrons/numerical_example_forward_backward_propagation
+    - file: content/multilayer_perceptrons/shortcut_to_calculate_forward_back_propagation
+    - file: content/multilayer_perceptrons/neural_networks_mlp_scratch_best
+    - file: content/multilayer_perceptrons/mlp_pytorch
+    - file: content/multilayer_perceptrons/mlp_keras
+  - caption: 3. Convolutional Neural Networks
+    chapters:
+    - file: content/convolutional_neural_networks/cnn_over_mlp
+    - file: content/convolutional_neural_networks/cnn_architecture
+      sections:
+      - file: content/convolutional_neural_networks/convolutional_layers
+      - file: content/convolutional_neural_networks/forward_propagation_convolution
+      - file: content/convolutional_neural_networks/backpropagation_convolution
+      - file: content/convolutional_neural_networks/pooling_layers
+    - file: content/convolutional_neural_networks/cnn_from_scratch
+    - file: content/convolutional_neural_networks/cnn_pytorch
+    - file: content/convolutional_neural_networks/cnn_keras
+    - file: content/convolutional_neural_networks/cnn_state_of_the_art
+  - caption: 4. Word Embeddings
+    chapters:
+    - file: content/word_embeddings/traditional_word_embeddings
+    - file: content/word_embeddings/static_word_embeddings
+      sections:
+      - file: content/word_embeddings/word2vec
+      - file: content/word_embeddings/glove
+      - file: content/word_embeddings/fasttext
+    - file: content/word_embeddings/contextual_word_embeddings
+      sections:
+      - file: content/word_embeddings/elmo

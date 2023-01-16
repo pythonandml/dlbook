@@ -1,0 +1,1 @@
+This is a sample document whose word vectors I want to calculate per line.

@@ -1,0 +1,906 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>2.8. Gradient Descent &#8212; Oddly Satisfying Deep Learning</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../../_static/logo.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="2.9. Regularization" href="regularization.html" />
+    <link rel="prev" title="2.7. Terminologies Part-2" href="terminologies_part_2.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../../index.html">
+      
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
+      
+      
+      <img src="../../_static/logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">Oddly Satisfying Deep Learning</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  1. Preliminaries
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/data_preprocessing.html">
+   1.1. Data Preprocessing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../preliminaries/performance_metrics.html">
+   1.2. Performance Metrics for ML and DL models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  2. Multilayer Perceptrons
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="activation.html">
+   2.1. Activation Functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="perceptron.html">
+   2.2. Perceptron
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="terminologies_part_1.html">
+   2.3. Terminologies Part-1
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="cost_functions.html">
+   2.4. Cost functions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="forward_propagation.html">
+   2.5. Forward propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="backpropagation.html">
+   2.6. Back Propagation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="terminologies_part_2.html">
+   2.7. Terminologies Part-2
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   2.8. Gradient Descent
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="regularization.html">
+   2.9. Regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dropout.html">
+   2.10. Dropout regularization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="batch_normalization.html">
+   2.11. Batch Normalization
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="numerical_example_forward_backward_propagation.html">
+   2.12. Numerical example Forward and Back pass
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="shortcut_to_calculate_forward_back_propagation.html">
+   2.13. Shortcut to calculate forward pass and backpropagation across layers
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="neural_networks_mlp_scratch_best.html">
+   2.14. MLP model from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="mlp_pytorch.html">
+   2.15. 4 step process to build MLP model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="mlp_keras.html">
+   2.16. MLP model using Tensorflow - Keras
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  3. Convolutional Neural Networks
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_over_mlp.html">
+   3.1. Convolutional Neural Networks over MLP
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_architecture.html">
+   3.2. Basic Architecture of CNN
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/convolutional_layers.html">
+     3.2.1. Convolutional layers
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/forward_propagation_convolution.html">
+     3.2.2 Forward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/backpropagation_convolution.html">
+     3.2.3 Backward Propagation Convolution layer (Vectorized)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../convolutional_neural_networks/pooling_layers.html">
+     3.2.4. Pooling layers
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_from_scratch.html">
+   3.3. Convolutional Neural Networks from scratch in Python
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_pytorch.html">
+   3.4. 4 step process to build a CNN model using PyTorch
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_keras.html">
+   3.5. CNN model using Tensorflow - Keras
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../convolutional_neural_networks/cnn_state_of_the_art.html">
+   3.6. State of the art CNN models
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  4. Word Embeddings
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../word_embeddings/traditional_word_embeddings.html">
+   4.1. Traditional Word Embeddings
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/static_word_embeddings.html">
+   4.2. Static Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/word2vec.html">
+     4.2.1. Word2Vec
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/glove.html">
+     4.2.2 GloVe
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/fasttext.html">
+     4.2.3. FastText
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../word_embeddings/contextual_word_embeddings.html">
+   4.3. Contextual Word Embeddings
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../word_embeddings/elmo.html">
+     4.3.1. Embeddings from Language Models (ELMo)
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<div class="menu-dropdown menu-dropdown-launch-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Launch interactive content">
+      <i class="fas fa-rocket"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://mybinder.org/v2/gh/pythonandml/dlbook/master?urlpath=tree/content/multilayer_perceptrons/gradient_descent.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Binder"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_binder.svg">
+  </span>
+<span class="headerbtn__text-container">Binder</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://colab.research.google.com/github/pythonandml/dlbook/blob/master/content/multilayer_perceptrons/gradient_descent.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Colab"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="../../_static/images/logo_colab.png">
+  </span>
+<span class="headerbtn__text-container">Colab</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/pythonandml/dlbook"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/pythonandml/dlbook/issues/new?title=Issue%20on%20page%20%2Fcontent/multilayer_perceptrons/gradient_descent.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="../../_sources/content/multilayer_perceptrons/gradient_descent.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#update-law">
+   Update law
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#mini-batch-gradient-descent">
+   Mini-batch gradient descent
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#gradient-descent-with-momentum">
+   Gradient descent with momentum
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#root-mean-square-prop-rmsprop">
+   Root Mean Square prop - RMSProp
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#adam">
+   Adam
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#learning-rate-decay">
+   Learning Rate Decay
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#problems-related-to-gradients">
+   Problems related to Gradients
+  </a>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>2.8. Gradient Descent</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#update-law">
+   Update law
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#mini-batch-gradient-descent">
+   Mini-batch gradient descent
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#gradient-descent-with-momentum">
+   Gradient descent with momentum
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#root-mean-square-prop-rmsprop">
+   Root Mean Square prop - RMSProp
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#adam">
+   Adam
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#learning-rate-decay">
+   Learning Rate Decay
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#problems-related-to-gradients">
+   Problems related to Gradients
+  </a>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="gradient-descent">
+<h1>2.8. Gradient Descent<a class="headerlink" href="#gradient-descent" title="Permalink to this headline">#</a></h1>
+<p>We have already seen the gradient descent and <strong>update law</strong> in <a class="reference external" href="https://pythonandml.github.io/dlbook/content/multilayer_perceptrons/terminologies_part_2.html">terminologies : part-2</a> (link to previous chapter). Just for the sake of completeness, let us quickly revisit the same.</p>
+<section id="update-law">
+<h2>Update law<a class="headerlink" href="#update-law" title="Permalink to this headline">#</a></h2>
+<p>Gradient Descent iteratively calculates the next value of a variable (<span class="math notranslate nohighlight">\(p_{n+1}\)</span>) using gradient of that variable (<span class="math notranslate nohighlight">\(\frac{\partial J}{\partial p_n}\)</span>) at the current iteration, scales it (by a learning rate, <span class="math notranslate nohighlight">\(\eta\)</span>) and subtracts obtained value from the current position (also called as taking a step). It subtracts the value because we want to minimise the function (to maximise it would be adding). This process can be written as:</p>
+<div class="math notranslate nohighlight">
+\[
+p_{n+1} = p_n - \eta \frac{\partial J}{\partial p_n}
+\]</div>
+<p>There’s an important parameter <span class="math notranslate nohighlight">\(\eta\)</span> which <em>scales</em> the gradient and thus controls the step size. In machine and deep learning, it is called <strong>learning rate</strong> and have a strong influence on performance.</p>
+</section>
+<section id="mini-batch-gradient-descent">
+<h2>Mini-batch gradient descent<a class="headerlink" href="#mini-batch-gradient-descent" title="Permalink to this headline">#</a></h2>
+<p>This technique consists of dividing the training set to <a class="reference external" href="https://pythonandml.github.io/dlbook/content/multilayer_perceptrons/terminologies_part_2.html#batch-size">batches</a> (link to previous chapter):</p>
+<p>Suppose we are given the batches {<span class="math notranslate nohighlight">\((X_1, y_1)\)</span>, <span class="math notranslate nohighlight">\((X_2, y_2)\)</span>, … ,<span class="math notranslate nohighlight">\((X_{N_b}, y_{N_b})\)</span>} where <span class="math notranslate nohighlight">\(N_b\)</span> is the <code class="docutils literal notranslate"><span class="pre">number</span> <span class="pre">of</span> <span class="pre">batches</span></code>.</p>
+<ul class="simple">
+<li><p>for <span class="math notranslate nohighlight">\(t=1,2,...N_b\)</span></p>
+<ul>
+<li><p>Carry out forward propagation on <span class="math notranslate nohighlight">\(X_t\)</span></p></li>
+<li><p>Compute cost function normalized on the size of batch</p></li>
+<li><p>Carry out Backpropagation using <span class="math notranslate nohighlight">\((X_t, y_t, \hat{y_t})\)</span></p></li>
+<li><p>Update weight <span class="math notranslate nohighlight">\(W\)</span> and <span class="math notranslate nohighlight">\(b\)</span></p></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<div><p><strong>Note:</strong> In the case where there is only one data sample (selected randomly) in the batch, the algorithm is called <strong>stochastic gradient descent</strong></p>
+</div></blockquote>
+</section>
+<section id="gradient-descent-with-momentum">
+<h2>Gradient descent with momentum<a class="headerlink" href="#gradient-descent-with-momentum" title="Permalink to this headline">#</a></h2>
+<p>Gradient descent with momentum is a variant of gradient descent which includes the notion of <code class="docutils literal notranslate"><span class="pre">momentum</span></code>.</p>
+<p>It is a method which helps accelerate gradients vectors in the right directions, thus leading to faster converging.</p>
+<p>The algorithm is as follows:</p>
+<p>For any layer <span class="math notranslate nohighlight">\(l=(1,2,...L)\)</span></p>
+<ul>
+<li><p>Initialize <span class="math notranslate nohighlight">\(v_{dW_l}=0\)</span> (size same as <span class="math notranslate nohighlight">\(dW_l\)</span>) and <span class="math notranslate nohighlight">\(v_{db_l}=0\)</span> (size same as <span class="math notranslate nohighlight">\(db_l\)</span>)</p></li>
+<li><p>On iteration <span class="math notranslate nohighlight">\(k\)</span></p>
+<ul class="simple">
+<li><p>Compute <span class="math notranslate nohighlight">\(dW_l\)</span> and <span class="math notranslate nohighlight">\(db_l\)</span> on current mini batch</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[v_{dW_l} = \alpha \hspace{0.1cm} v_{dW_l} + (1-\alpha) \hspace{0.1cm}dW_l\]</div>
+<div class="math notranslate nohighlight">
+\[v_{db_l} = \alpha \hspace{0.1cm} v_{db_l} + (1-\alpha) \hspace{0.1cm}db_l\]</div>
+<ul>
+<li><p>Update the parameters</p>
+<div class="math notranslate nohighlight">
+\[W_l := W_l - \eta \hspace{0.1cm} v_{dW_l}\]</div>
+<div class="math notranslate nohighlight">
+\[b_l := b_l - \eta \hspace{0.1cm} v_{db_l}\]</div>
+</li>
+</ul>
+</li>
+</ul>
+<p>The hyper-parameter <span class="math notranslate nohighlight">\(\alpha\)</span> is called the <strong>momentum</strong>. In deep learning, most practitioners set the value of <span class="math notranslate nohighlight">\(\alpha=0.9\)</span> without attempting to further tune this hyperparameter (i.e., this is the default value for momentum in many popular deep learning packages).</p>
+</section>
+<section id="root-mean-square-prop-rmsprop">
+<h2>Root Mean Square prop - RMSProp<a class="headerlink" href="#root-mean-square-prop-rmsprop" title="Permalink to this headline">#</a></h2>
+<p>It is very similar to gradient descent with momentum, the only difference is that it includes the second-order momentum instead of the first-order one, plus a slight change on the parameter’s update:</p>
+<p>The algorithm is as follows:</p>
+<p>For any layer <span class="math notranslate nohighlight">\(l=(1,2,...L)\)</span></p>
+<ul>
+<li><p>Initialize <span class="math notranslate nohighlight">\(S_{dW_l}=0\)</span> (size same as <span class="math notranslate nohighlight">\(dW_l\)</span>) and <span class="math notranslate nohighlight">\(S_{db_l}=0\)</span> (size same as <span class="math notranslate nohighlight">\(db_l\)</span>)</p></li>
+<li><p>On iteration <span class="math notranslate nohighlight">\(k\)</span></p>
+<ul class="simple">
+<li><p>Compute <span class="math notranslate nohighlight">\(dW_l\)</span> and <span class="math notranslate nohighlight">\(db_l\)</span> on current mini batch</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[S_{dW_l} = \alpha \hspace{0.1cm} S_{dW_l} + (1-\alpha) \hspace{0.1cm}dW_l^2\]</div>
+<div class="math notranslate nohighlight">
+\[S_{db_l} = \alpha \hspace{0.1cm} S_{db_l} + (1-\alpha) \hspace{0.1cm}db_l^2\]</div>
+<ul class="simple">
+<li><p>Update the parameters</p></li>
+</ul>
+</li>
+</ul>
+<div class="math notranslate nohighlight">
+\[W_l := W_l - \frac{\eta}{\sqrt{S_{dW_l}} + \epsilon} \hspace{0.1cm} dW_l\]</div>
+<div class="math notranslate nohighlight">
+\[b_l := b_l - \frac{\eta}{\sqrt{S_{db_l}} + \epsilon} \hspace{0.1cm} db_l\]</div>
+</section>
+<section id="adam">
+<h2>Adam<a class="headerlink" href="#adam" title="Permalink to this headline">#</a></h2>
+<p>Adam (adaptive learning rate optimization) can be seen as a combination of RMSprop and gradient descent with momentum. The main idea is to avoid oscillations during optimization by accelerating the descent in the right direction.</p>
+<p>The algorithm is as follows:</p>
+<p>For any layer <span class="math notranslate nohighlight">\(l=(1,2,...L)\)</span></p>
+<ul>
+<li><p>Initialize <span class="math notranslate nohighlight">\(v_{dW_l}=0\)</span>, <span class="math notranslate nohighlight">\(v_{db_l}=0\)</span>, <span class="math notranslate nohighlight">\(S_{dW_l}=0\)</span> and <span class="math notranslate nohighlight">\(S_{db_l}=0\)</span></p></li>
+<li><p>On iteration <span class="math notranslate nohighlight">\(k\)</span></p>
+<ul>
+<li><p>Compute <span class="math notranslate nohighlight">\(dW_l\)</span> and <span class="math notranslate nohighlight">\(db_l\)</span> on current mini batch</p></li>
+<li><p>Momentum</p>
+<p><span class="math notranslate nohighlight">\(v_{dW_l} = \alpha_1 \hspace{0.1cm} v_{dW_l} + (1-\alpha_1) \hspace{0.1cm}dW_l\)</span></p>
+<p><span class="math notranslate nohighlight">\(v_{db_l} = \alpha_1 \hspace{0.1cm} v_{db_l} + (1-\alpha_1) \hspace{0.1cm}db_l\)</span></p>
+</li>
+<li><p>RMSProp</p>
+<p><span class="math notranslate nohighlight">\(S_{dW_l} = \alpha_2 \hspace{0.1cm} S_{dW_l} + (1-\alpha_2) \hspace{0.1cm}dW_l^2\)</span></p>
+<p><span class="math notranslate nohighlight">\(S_{db_l} = \alpha_2 \hspace{0.1cm} S_{db_l} + (1-\alpha_2) \hspace{0.1cm}db_l^2\)</span></p>
+</li>
+<li><p>Correction</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[
+    v_{dW_l} = \frac{v_{dW_l}}{1-\alpha_1^k}
+    \]</div>
+<div class="math notranslate nohighlight">
+\[
+    v_{db_l} = \frac{v_{db_l}}{1-\alpha_1^k}
+    \]</div>
+<div class="math notranslate nohighlight">
+\[
+    S_{dW_l} = \frac{S_{dW_l}}{1-\alpha_2^k}
+    \]</div>
+<div class="math notranslate nohighlight">
+\[
+    S_{db_l} = \frac{S_{db_l}}{1-\alpha_2^k}
+    \]</div>
+<ul class="simple">
+<li><p>Update the parameters</p></li>
+</ul>
+</li>
+</ul>
+<div class="math notranslate nohighlight">
+\[W_l := W_l - \frac{\eta}{\sqrt{S_{dW_l}} + \epsilon} \hspace{0.1cm} v_{dW_l}\]</div>
+<div class="math notranslate nohighlight">
+\[b_l := b_l - \frac{\eta}{\sqrt{S_{db_l}} + \epsilon} \hspace{0.1cm} v_{db_l}\]</div>
+<blockquote>
+<div><p><strong>Note:</strong> Good default settings for the tested Machine Learning and Deep learning models are <span class="math notranslate nohighlight">\(\eta = 0.001\)</span>, <span class="math notranslate nohighlight">\(\alpha_1 = 0.9\)</span>, <span class="math notranslate nohighlight">\(\alpha_2 = 0.999\)</span> and <span class="math notranslate nohighlight">\(\epsilon = 10^{-8}\)</span>.</p>
+</div></blockquote>
+</section>
+<section id="learning-rate-decay">
+<h2>Learning Rate Decay<a class="headerlink" href="#learning-rate-decay" title="Permalink to this headline">#</a></h2>
+<p>The main objective of the learning rate decay is to slowly reduce the learning rate over time/iterations. There exist many learning rate decay laws, here are some of the most common:</p>
+<p><strong>Time-Based Decay</strong></p>
+<p>The mathematical form of time-based decay for learning rate <span class="math notranslate nohighlight">\(\eta_t\)</span> is:</p>
+<div class="math notranslate nohighlight">
+\[
+\eta_{t+1} = \frac{\eta_0}{1+Kt}
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(t\)</span> is the <code class="docutils literal notranslate"><span class="pre">iteration</span> <span class="pre">number</span></code> and <span class="math notranslate nohighlight">\(K\)</span> is the hyper-parameter called <code class="docutils literal notranslate"><span class="pre">Decay</span> <span class="pre">rate</span></code>. Let <span class="math notranslate nohighlight">\(E\)</span> be the total number of epochs, then usually we take <span class="math notranslate nohighlight">\(K=\frac{\eta_0}{E}\)</span> where <span class="math notranslate nohighlight">\(\eta_0\)</span> is the initial learning rate.</p>
+<p><strong>Step Decay</strong></p>
+<p>Step decay drops the learning rate by a factor of every few epochs. For example, let’s suppose our initial learning rate is <span class="math notranslate nohighlight">\(\eta_0 = 0.01\)</span>.</p>
+<p>After 10 epochs we drop the learning rate to <span class="math notranslate nohighlight">\(\eta = 0.005\)</span>.</p>
+<p>After another 10 epochs (i.e., the 20th total epoch), <span class="math notranslate nohighlight">\(\eta\)</span> is dropped by a factor of 0.5 again, such that <span class="math notranslate nohighlight">\(\eta = 0.0025\)</span>, etc.</p>
+<p>The mathematical form of step decay is:</p>
+<div class="math notranslate nohighlight">
+\[
+\eta_{e+1} = \eta_0 \hspace{0.12cm} F^{\left \lfloor \frac{1+e}{D} \right \rfloor}
+\]</div>
+<p>Where <span class="math notranslate nohighlight">\(\eta_0\)</span> is the initial learning rate, <span class="math notranslate nohighlight">\(F\)</span> is the factor value controlling the rate in which the learning date drops, <span class="math notranslate nohighlight">\(D\)</span> is the “Drop every” epochs value, <span class="math notranslate nohighlight">\(e\)</span> is the current epoch and <span class="math notranslate nohighlight">\(\lfloor x \rfloor\)</span> is the <span class="math notranslate nohighlight">\(\text{floor(x)}\)</span></p>
+<p>The larger our factor <span class="math notranslate nohighlight">\(F\)</span> is, the slower the learning rate will decay and conversely, the smaller the factor <span class="math notranslate nohighlight">\(F\)</span>, the faster the learning rate will decay.</p>
+<p><strong>Exponential Decay</strong></p>
+<p>Another common schedule is exponential decay. It has the mathematical form:</p>
+<div class="math notranslate nohighlight">
+\[
+\eta_{t+1} = \eta_0 * e^{−kt}
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(k\)</span> is <code class="docutils literal notranslate"><span class="pre">hyper-parameter</span></code> and <span class="math notranslate nohighlight">\(t\)</span> is the <code class="docutils literal notranslate"><span class="pre">iteration</span> <span class="pre">number</span></code>.</p>
+</section>
+<section id="problems-related-to-gradients">
+<h2>Problems related to Gradients<a class="headerlink" href="#problems-related-to-gradients" title="Permalink to this headline">#</a></h2>
+<p><strong>Vanishing gradient</strong></p>
+<p>As the number of layers in the neural networks increase, the gradient value (used during back propagation) decreases and eventually it tends to zero. This is called <code class="docutils literal notranslate"><span class="pre">vanishing</span> <span class="pre">gradient</span> <span class="pre">problem</span></code>. The result is that the weights of the model now stops updating and model cannot learn further.</p>
+<p>This mostly happens in the case <em>when number of layers are too high</em> or the activation function used in the model is <code class="docutils literal notranslate"><span class="pre">sigmoid</span></code> or <code class="docutils literal notranslate"><span class="pre">tanh</span></code>.</p>
+<p>The remedy for this problem is to use <code class="docutils literal notranslate"><span class="pre">ReLU</span> <span class="pre">activation</span></code> function or initialize the parameters in such a way that the weight value doesn’t become zero.</p>
+<p><strong>Exploding gradient</strong></p>
+<p>In contrast to the vanishing gradient problem, in exploding gradient problem, the gradients instead of vanishing, accumulates and results in a very large value (tending to infinity) during training.</p>
+<p>This makes the model unstable and leads to a poor prediction reporting nan values (<strong>n</strong>ot <strong>a</strong> <strong>n</strong>umber) most of the time.</p>
+<p>There are methods to fix exploding gradients, which include <code class="docutils literal notranslate"><span class="pre">gradient</span> <span class="pre">clipping</span></code> (where we clip the gradient to certain range), <code class="docutils literal notranslate"><span class="pre">data</span> <span class="pre">normalization</span></code>, <code class="docutils literal notranslate"><span class="pre">weight</span> <span class="pre">regularization</span></code>, etc.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./content/multilayer_perceptrons"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="terminologies_part_2.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">2.7. Terminologies Part-2</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="regularization.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">2.9. Regularization</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Ujjwal Khandelwal<br/>
+  
+      &copy; Copyright 2023.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>
